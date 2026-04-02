@@ -1,0 +1,8 @@
+{
+  "project_name": "InnerProof",
+  "contract_address": "0x94cef9ea0c6eafd80d8aff27d9aad9f1c8972f11",
+  "module_name": "soulbound_nft",
+  "tx_hash": "465524E53C2002CA85421D5FAB0E6BC25FF85043F035150C1901906248E677E2",
+  "network": "innerproof-1",
+  "description": "InnerProof: Anonymous AI therapy appchain with verifiable progress tracking via Soulbound NFTs."
+}

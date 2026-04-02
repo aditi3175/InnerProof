@@ -1,0 +1,24 @@
+Weave is the CLI for managing Initia deployments.
+
+See 'https://docs.initia.xyz/developers/developer-guides/tools/clis/weave-cli/introduction' for more information about the setup process and potential issues.
+
+Usage:
+  weave [command]
+
+Available Commands:
+  analytics   Configure analytics e.g. enable/disable data collection
+  completion  Generate the autocompletion script for the specified shell
+  gas-station Gas Station subcommands
+  help        Help about any command
+  init        Initialize Weave CLI, funding gas station and setting up config.
+  initia      Initia node subcommands
+  opinit      OPInit bots subcommands
+  relayer     Relayer subcommands
+  rollup      Rollup subcommands
+  upgrade     Upgrade the Weave binary to the latest or a specified version from GitHub
+  version     Print the Weave binary version
+
+Flags:
+  -h, --help   help for weave
+
+Use "weave [command] --help" for more information about a command.

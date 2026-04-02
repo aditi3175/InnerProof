@@ -1,0 +1,15 @@
+Gas Station subcommands.
+
+See 'https://docs.initia.xyz/developers/developer-guides/tools/clis/weave-cli/gas-station' for more information about the setup process and potential issues.
+
+Usage:
+  weave gas-station [command]
+
+Available Commands:
+  setup       Setup Gas Station account on Initia and Celestia for funding the OPinit-bots or relayer to send transactions
+  show        Show Initia and Celestia Gas Station addresses and balances
+
+Flags:
+  -h, --help   help for gas-station
+
+Use "weave gas-station [command] --help" for more information about a command.

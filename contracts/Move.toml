@@ -1,0 +1,10 @@
+[package]
+name = "InnerProofSBT"
+version = "0.0.1"
+
+[dependencies]
+InitiaStdlib = { git = "https://github.com/initia-labs/movevm.git", subdir = "precompile/modules/initia_stdlib", rev = "main" }
+
+[addresses]
+std = "0x1"
+innerproof = "0x94cef9ea0c6eafd80d8aff27d9aad9f1c8972f11"
