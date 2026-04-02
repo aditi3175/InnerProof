@@ -175,7 +175,7 @@ Without the `store` ability, standard transfer functions **cannot move this obje
 Built for the **INITIATE: The Initia Hackathon Season 1** (March–April 2026)
 
 ### Deployment Details
-- **Network**: `innerproof-1`
+- **Network**: `innerproof-1` (Local Weave Devnet)
 - **Module ID**: `0x94cef9ea0c6eafd80d8aff27d9aad9f1c8972f11::soulbound_nft`
 - **Deployment Tx**: `465524E53C2002CA85421D5FAB0E6BC25FF85043F035150C1901906248E677E2`
 

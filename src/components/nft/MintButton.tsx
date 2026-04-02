@@ -86,7 +86,7 @@ export function MintButton({
           </h3>
           <p className="text-body" style={{ textAlign: 'center' }}>
             {canMint
-              ? 'You\'ve completed enough sessions to mint your Soulbound Progress Token.'
+              ? `You've completed ${progressData.sessionsCompleted} sessions! Your Level 1 SBT is ready.`
               : `Complete ${MIN_SESSIONS_TO_MINT - progressData.sessionsCompleted} more session(s) to unlock minting.`}
           </p>
 

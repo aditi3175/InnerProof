@@ -17,7 +17,7 @@ export const LEVEL_THRESHOLDS = {
 } as const;
 
 // Minimum sessions required to mint SBT
-export const MIN_SESSIONS_TO_MINT = 3;
+export const MIN_SESSIONS_TO_MINT = 5;
 
 // Level colors for UI
 export const LEVEL_COLORS: Record<string, string> = {
