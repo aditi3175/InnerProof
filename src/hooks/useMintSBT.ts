@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import type { MintParams } from '@/types';
-import { useInterwovenKit } from '@initia/interwovenkit-react';
-import { bcs } from '@initia/initia.js';
+import { useAddress, useWallet } from '../providers/WalletProvider';
+import { bcs, MsgExecute } from '@initia/initia.js';
 
 interface UseMintSBTReturn {
   isMinting: boolean;
@@ -12,51 +12,75 @@ interface UseMintSBTReturn {
   resetMintState: () => void;
 }
 
+/**
+ * 🦾 FINAL VICTORY ADDRESS (PHASE 1 COMPLETE) ✨
+ * Hardcoded to bypass any .env or Vite cache issues for the demo video.
+ */
+const FINAL_CONTRACT_ADDR = '0xced956677c796c53318fd38d5ea8651b73f822a';
+
 export function useMintSBT(_walletAddress: string | undefined): UseMintSBTReturn {
   const [isMinting, setIsMinting] = useState(false);
   const [mintSuccess, setMintSuccess] = useState(false);
   const [mintError, setMintError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
-  const { initiaAddress, requestTxBlock } = useInterwovenKit();
+  
+  const address = useAddress();
+  const { requestInitiaTx } = useWallet();
 
   const mint = useCallback(async (params: MintParams) => {
+    console.log('🦾 STARTING FINAL MINTING FLOW ✨', params);
     setIsMinting(true);
     setMintError(null);
     setMintSuccess(false);
 
     try {
+      if (!address) throw new Error('Wallet not connected!');
+      
+      // Using hardcoded victory address instead of .env to ensure success
+      const contractAddr = FINAL_CONTRACT_ADDR;
+      console.log('🛠️ Targeting Module Address:', contractAddr);
 
-      const tx = await requestTxBlock({
-        messages: [{
-          typeUrl: '/initia.move.v1.MsgExecute',
-          value: {
-            sender: initiaAddress,
-            moduleAddress: import.meta.env.VITE_CONTRACT_ADDRESS,
-            moduleName: 'soulbound_nft',
-            functionName: 'mint',
-            typeArgs: [],
-            args: [
-              bcs.u64().serialize(params.sessionsCompleted).toBase64(),
-              bcs.u64().serialize(params.improvementScore).toBase64(),
-              bcs.string().serialize(params.level).toBase64(),
-              bcs.u64().serialize(params.timestamp).toBase64(),
-            ],
-          },
-        }],
+      // Essential rounding for u64 compatibility
+      const sessions = Math.floor(params.sessionsCompleted);
+      const score = Math.floor(params.improvementScore * 100);
+      const timestamp = Math.floor(params.timestamp);
+
+      // Prepare real MsgExecute for Move L1
+      const msg = new MsgExecute(
+        address,
+        contractAddr,
+        'soulbound_nft',
+        'mint',
+        [], // typeArgs
+        [
+          bcs.u64().serialize(sessions).toBase64(),
+          bcs.u64().serialize(score).toBase64(),
+          bcs.string().serialize(params.level).toBase64(),
+          bcs.u64().serialize(timestamp).toBase64(),
+          bcs.string().serialize(params.metadataUri).toBase64(),
+        ]
+      );
+
+      console.log('🚀 Sending Transaction Request to Wallet...');
+      
+      // Sign and broadcast via official SDK
+      const hash = await requestInitiaTx({
+        msgs: [msg],
+        memo: 'InnerProof SBT Mint'
       });
 
-      setTxHash(tx.transactionHash);
+      console.log('✅ TRANSACTION SUCCESSFUL! Hash:', hash);
+      setTxHash(hash);
       setMintSuccess(true);
-
-      console.log('SBT Mint params:', params);
-      console.log('Real tx hash:', tx.transactionHash);
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : 'Failed to mint SBT';
+    } catch (e: any) {
+      console.error('😱 MINTING ERROR:', e);
+      const errorMessage = e?.message || 'Failed to mint SBT. Check console.';
       setMintError(errorMessage);
     } finally {
       setIsMinting(false);
+      console.log('🔚 Minting flow completed.');
     }
-  }, [initiaAddress, requestTxBlock]);
+  }, [address, requestInitiaTx]);
 
   const resetMintState = useCallback(() => {
     setMintSuccess(false);

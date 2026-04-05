@@ -26,6 +26,8 @@ module innerproof::soulbound_nft {
         minted_at: u64,
         /// Unix timestamp of the most recent update
         last_updated: u64,
+        /// URI for IPFS metadata
+        metadata_uri: String,
     }
 
     // ==================== Events ====================
@@ -37,6 +39,7 @@ module innerproof::soulbound_nft {
         level: String,
         sessions_completed: u64,
         improvement_score: u64,
+        metadata_uri: String,
     }
 
     #[event]
@@ -46,6 +49,7 @@ module innerproof::soulbound_nft {
         level: String,
         sessions_completed: u64,
         improvement_score: u64,
+        metadata_uri: String,
     }
 
     // ==================== Error Codes ====================
@@ -68,6 +72,7 @@ module innerproof::soulbound_nft {
         improvement_score: u64,
         level: String,
         timestamp: u64,
+        metadata_uri: String,
     ) {
         let addr = signer::address_of(account);
 
@@ -85,6 +90,7 @@ module innerproof::soulbound_nft {
             level,
             minted_at: timestamp,
             last_updated: timestamp,
+            metadata_uri,
         };
 
         move_to(account, sbt);
@@ -95,6 +101,7 @@ module innerproof::soulbound_nft {
             level,
             sessions_completed,
             improvement_score,
+            metadata_uri,
         });
     }
 
@@ -106,6 +113,7 @@ module innerproof::soulbound_nft {
         improvement_score: u64,
         level: String,
         timestamp: u64,
+        metadata_uri: String,
     ) acquires ProgressSBT {
         let addr = signer::address_of(account);
 
@@ -121,6 +129,7 @@ module innerproof::soulbound_nft {
         sbt.improvement_score = improvement_score;
         sbt.level = level;
         sbt.last_updated = timestamp;
+        sbt.metadata_uri = metadata_uri;
 
         // Emit update event
         event::emit(UpdateEvent {
@@ -128,6 +137,7 @@ module innerproof::soulbound_nft {
             level,
             sessions_completed,
             improvement_score,
+            metadata_uri,
         });
     }
 

@@ -1,17 +1,27 @@
 import { useNavigate } from 'react-router-dom';
-import { Shield, Bot, Trophy, Lock, ArrowRight, Sparkles } from 'lucide-react';
+import { Shield, Bot, Trophy, Lock, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface LandingPageProps {
   isConnected: boolean;
   onConnect: () => void;
+  onVerify: () => void;
+  isWalletConnected: boolean;
 }
 
-export function LandingPage({ isConnected, onConnect }: LandingPageProps) {
+export function LandingPage({ 
+  isConnected, 
+  onConnect, 
+  onVerify, 
+  isWalletConnected 
+}: LandingPageProps) {
   const navigate = useNavigate();
 
   const handleCTA = () => {
     if (isConnected) {
       navigate('/chat');
+    } else if (isWalletConnected) {
+      // If wallet is hooked but not signed/verified
+      onVerify();
     } else {
       onConnect();
     }
@@ -38,8 +48,8 @@ export function LandingPage({ isConnected, onConnect }: LandingPageProps) {
               InnerProof
             </span>
           </div>
-          <button onClick={handleCTA} className="btn btn-primary" id="landing-connect-btn">
-            {isConnected ? 'Go to Chat' : 'Connect Wallet'}
+          <button onClick={handleCTA} className={`btn ${isConnected ? 'btn-secondary' : 'btn-primary'}`} id="landing-connect-btn">
+            {isConnected ? 'Go to Chat' : isWalletConnected ? 'Verify Account' : 'Connect Wallet'}
           </button>
         </div>
       </nav>
@@ -65,11 +75,25 @@ export function LandingPage({ isConnected, onConnect }: LandingPageProps) {
           </p>
 
           <div className="landing-cta-group">
-            <button onClick={handleCTA} className="btn btn-primary btn-lg" id="hero-cta-btn">
-              {isConnected ? 'Start Session' : 'Connect Wallet & Begin'}
-              <ArrowRight size={18} />
+            <button 
+              onClick={handleCTA} 
+              className={`btn ${isConnected ? 'btn-primary' : 'btn-primary'} btn-lg`} 
+              id="hero-cta-btn"
+              style={isWalletConnected && !isConnected ? { background: 'var(--warning)', borderColor: 'var(--warning-hover)' } : {}}
+            >
+              {isConnected ? (
+                <>Start Session <ArrowRight size={18} /></>
+              ) : isWalletConnected ? (
+                <>Approve in Wallet <CheckCircle2 size={18} /></>
+              ) : (
+                <>Connect Wallet & Begin <ArrowRight size={18} /></>
+              )}
             </button>
-            <span className="text-small">No sign-up required · Wallet-only login</span>
+            <span className="text-small">
+              {isWalletConnected && !isConnected 
+                ? 'Please sign the verification message in your wallet' 
+                : 'No sign-up required · Wallet-only login'}
+            </span>
           </div>
         </div>
       </section>

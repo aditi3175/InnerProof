@@ -412,8 +412,68 @@ body {
   justify-content: center;
 }
 
-.flex-between {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+/* ========== Initia Wallet Widget UI Restoration (PHASE 1 FINAL) ========== */
+
+div[class*="backdrop"] {
+    background: rgba(0, 0, 0, 0.8) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    z-index: 999999 !important;
+}
+
+main[class*="svelte-"] {
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    margin: 0 !important;
+    height: 100vh !important;
+    width: 440px !important;
+    max-width: 95vw !important;
+    border-radius: 0 !important;
+    border-left: 1px solid var(--surface-border) !important;
+    background: var(--bg-secondary) !important;
+    box-shadow: -20px 0 80px rgba(0, 0, 0, 0.9) !important;
+    animation: slideInRight 0.4s ease-out forwards !important;
+    z-index: 1000000 !important;
+}
+
+/* 3. Hide VM-Misleading Group Labels (EVM Title) */
+main[class*="svelte-"] h2[class*="title"], 
+main[class*="svelte-"] div[class*="group"], 
+main[class*="svelte-"] div[class*="label"],
+main[class*="svelte-"] h2,
+main[class*="svelte-"] h3 {
+    display: none !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    font-size: 0 !important;
+    pointer-events: none !important;
+}
+
+button[class*="item"] {
+    background: rgba(255, 255, 255, 0.03) !important;
+    border: 1px solid var(--surface-border) !important;
+    border-radius: var(--radius-md) !important;
+    margin-bottom: 14px !important;
+    padding: 16px 24px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    color: var(--text-primary) !important;
+}
+
+button[class*="item"]:hover {
+    background: rgba(108, 99, 255, 0.08) !important;
+    border-color: var(--primary-500) !important;
+    transform: translateX(-12px) !important;
+    box-shadow: -12px 0 30px rgba(108, 99, 255, 0.2) !important;
+}
+
+button[class*="item"] img {
+    border-radius: var(--radius-sm) !important;
+    width: 36px !important;
+    height: 36px !important;
 }

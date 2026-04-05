@@ -7,4 +7,4 @@ InitiaStdlib = { git = "https://github.com/initia-labs/movevm.git", subdir = "pr
 
 [addresses]
 std = "0x1"
-innerproof = "0x94cef9ea0c6eafd80d8aff27d9aad9f1c8972f11"
+innerproof = "0xced956677c796c53318fd38d5ea8651b73f822a"

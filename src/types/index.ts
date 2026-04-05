@@ -59,6 +59,7 @@ export interface MintParams {
   improvementScore: number;
   level: string;
   timestamp: number;
+  metadataUri: string;
 }
 
 // ========== Nav Types ==========

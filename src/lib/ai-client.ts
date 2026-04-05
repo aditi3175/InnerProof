@@ -19,23 +19,37 @@ export async function sendMessage(
   newMessage: string
 ): Promise<string> {
   const client = getClient();
-  const model = client.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  
+  // 1. Pass the system instruction in the correct OBJECT format here
+  const model = client.getGenerativeModel({ 
+    model: 'models/gemini-2.5-flash',
+    systemInstruction: {
+      role: 'system',
+      parts: [{ text: AI_SYSTEM_PROMPT }],
+    },
+  });
 
-  // Build conversation history
   const history = messages.map((msg) => ({
     role: msg.role === 'user' ? 'user' as const : 'model' as const,
     parts: [{ text: msg.content }],
   }));
 
+  // 2. Start the chat WITHOUT passing systemInstruction again
   const chat = model.startChat({
     history,
-    systemInstruction: {
-      role: 'user' as const,
-      parts: [{ text: AI_SYSTEM_PROMPT }],
-    },
   });
 
-  const result = await chat.sendMessage(newMessage);
-  const response = result.response;
-  return response.text();
+  try {
+    const result = await chat.sendMessage(newMessage);
+    const response = await result.response;
+    return response.text();
+  } catch (e) {
+    const err = e as any;
+    console.error("Gemini API Error:", err);
+    
+    if (err.status === 429) {
+      throw new Error("Rate limit reached. Please wait 60 seconds.");
+    }
+    throw e;
+  }
 }

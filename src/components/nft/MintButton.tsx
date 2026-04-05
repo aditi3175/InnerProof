@@ -18,11 +18,20 @@ export function MintButton({
   onMint,
 }: MintButtonProps) {
   const handleMint = () => {
+    console.log('Mint button clicked! Improvement Score:', progressData.improvementScore);
+    // Map improvement score (0-100) to 1-5 scale for JSON files
+    // 0-20 -> 1, 21-40 -> 2, 41-60 -> 3, 61-80 -> 4, 81-100 -> 5
+    const scoreTier = Math.min(5, Math.max(1, Math.ceil(progressData.improvementScore / 20)));
+    const baseCid = 'ipfs://bafybeih2kve2yp2a6p5aclb7ehzemkyaclsoj3mxegxfbtz3ip5yju4my4/';
+    const metadataUri = `${baseCid}${scoreTier}.json`;
+
+    console.log('Calling onMint with:', { metadataUri });
     onMint({
       sessionsCompleted: progressData.sessionsCompleted,
       improvementScore: progressData.improvementScore,
       level: progressData.level,
       timestamp: Math.floor(Date.now() / 1000),
+      metadataUri,
     });
   };
 
