@@ -13,45 +13,40 @@ interface UseMintSBTReturn {
 }
 
 /**
- * 🦾 FINAL VICTORY ADDRESS (PHASE 1 COMPLETE) ✨
- * Hardcoded to bypass any .env or Vite cache issues for the demo video.
+ * Deployed contract address on initiation-2 testnet.
+ * Bech32: init1pnke2enhc7tv2vccl5udt65x2xmnlq32f3860c
  */
-const FINAL_CONTRACT_ADDR = '0xced956677c796c53318fd38d5ea8651b73f822a';
+const CONTRACT_ADDRESS = '0xced956677c796c53318fd38d5ea8651b73f822a';
 
 export function useMintSBT(_walletAddress: string | undefined): UseMintSBTReturn {
   const [isMinting, setIsMinting] = useState(false);
   const [mintSuccess, setMintSuccess] = useState(false);
   const [mintError, setMintError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
-  
+
   const address = useAddress();
   const { requestInitiaTx } = useWallet();
 
   const mint = useCallback(async (params: MintParams) => {
-    console.log('🦾 STARTING FINAL MINTING FLOW ✨', params);
     setIsMinting(true);
     setMintError(null);
     setMintSuccess(false);
 
     try {
-      if (!address) throw new Error('Wallet not connected!');
-      
-      // Using hardcoded victory address instead of .env to ensure success
-      const contractAddr = FINAL_CONTRACT_ADDR;
-      console.log('🛠️ Targeting Module Address:', contractAddr);
+      if (!address) {
+        throw new Error('Wallet not connected. Please connect your wallet first.');
+      }
 
-      // Essential rounding for u64 compatibility
       const sessions = Math.floor(params.sessionsCompleted);
       const score = Math.floor(params.improvementScore * 100);
       const timestamp = Math.floor(params.timestamp);
 
-      // Prepare real MsgExecute for Move L1
       const msg = new MsgExecute(
         address,
-        contractAddr,
+        CONTRACT_ADDRESS,
         'soulbound_nft',
         'mint',
-        [], // typeArgs
+        [],
         [
           bcs.u64().serialize(sessions).toBase64(),
           bcs.u64().serialize(score).toBase64(),
@@ -61,24 +56,25 @@ export function useMintSBT(_walletAddress: string | undefined): UseMintSBTReturn
         ]
       );
 
-      console.log('🚀 Sending Transaction Request to Wallet...');
-      
-      // Sign and broadcast via official SDK
       const hash = await requestInitiaTx({
         msgs: [msg],
-        memo: 'InnerProof SBT Mint'
+        memo: 'InnerProof SBT Mint',
       });
 
-      console.log('✅ TRANSACTION SUCCESSFUL! Hash:', hash);
       setTxHash(hash);
       setMintSuccess(true);
-    } catch (e: any) {
-      console.error('😱 MINTING ERROR:', e);
-      const errorMessage = e?.message || 'Failed to mint SBT. Check console.';
-      setMintError(errorMessage);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to mint SBT.';
+
+      if (message.includes('LINKER_ERROR')) {
+        setMintError('Contract not found on-chain. It may not be deployed yet.');
+      } else if (message.includes('rejected') || message.includes('denied')) {
+        setMintError('Transaction was rejected in your wallet.');
+      } else {
+        setMintError(message);
+      }
     } finally {
       setIsMinting(false);
-      console.log('🔚 Minting flow completed.');
     }
   }, [address, requestInitiaTx]);
 

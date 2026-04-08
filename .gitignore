@@ -30,3 +30,21 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Contract build artifacts
+contracts/build/
+
+# Sensitive contract files
+contracts/minitia_keys.json
+contracts/deploy_output.json
+contracts/tx_result.json
+contracts/config.json
+
+# Debug / temp files
+temp.mjs
+test_gemini.mjs
+tsc_errors.txt
+fix_readme*.py
+fix_readme*.js
+README_fixed.md
+docker-compose.yml

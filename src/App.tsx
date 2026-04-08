@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { storage } from './lib/storage';
 import { WalletProvider } from './providers/WalletProvider';
 import { Layout } from './components/layout/Layout';
 import { LandingPage } from './pages/LandingPage';
@@ -21,6 +22,33 @@ function AppContent() {
   const { progressData, canMint, addMoodEntry, getMoodTrend } =
     useMoodTracker(address);
   const { isMinting, mintSuccess, txHash, mint } = useMintSBT(address);
+
+  // Persist mint state to localStorage
+  const [persistedMint, setPersistedMint] = useState(false);
+  const [persistedTxHash, setPersistedTxHash] = useState<string | null>(null);
+
+  // Load persisted mint state on wallet connect
+  useEffect(() => {
+    if (address) {
+      const saved = storage.get<{ minted: boolean; txHash: string | null }>(address, 'mint_state');
+      if (saved?.minted) {
+        setPersistedMint(true);
+        setPersistedTxHash(saved.txHash);
+      }
+    }
+  }, [address]);
+
+  // Save when minting succeeds
+  useEffect(() => {
+    if (mintSuccess && address) {
+      storage.set(address, 'mint_state', { minted: true, txHash });
+      setPersistedMint(true);
+      setPersistedTxHash(txHash);
+    }
+  }, [mintSuccess, txHash, address]);
+
+  const effectiveMintSuccess = mintSuccess || persistedMint;
+  const effectiveTxHash = txHash || persistedTxHash;
 
   // Challenge for verification - ensures a Keplr popup appears even if already authorized
   const handleVerify = useCallback(async () => {
@@ -115,7 +143,7 @@ function AppContent() {
                 moodTrend={getMoodTrend()}
                 canMint={canMint}
                 isMinting={isMinting}
-                mintSuccess={mintSuccess}
+                mintSuccess={effectiveMintSuccess}
                 onMint={mint}
               />
             </Layout>
@@ -136,8 +164,8 @@ function AppContent() {
                 isConnected={isConnected}
                 walletAddress={address}
                 progressData={progressData}
-                hasMinted={mintSuccess}
-                txHash={txHash}
+                hasMinted={effectiveMintSuccess}
+                txHash={effectiveTxHash}
               />
             </Layout>
           }

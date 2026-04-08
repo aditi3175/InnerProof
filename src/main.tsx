@@ -2,9 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 
-// 🦾 NUCLEAR GLOBAL POLYFILL INJECTION ✨
-// Essential for @initia/initia.js BCS serialization in browser environment.
-// This is mandated for the Phase 1 Finalized Wallet/NFT integration.
+// Global polyfills required by @initia/initia.js BCS serialization
 import { Buffer } from 'buffer'
 window.Buffer = Buffer
 window.global = window
@@ -20,7 +18,7 @@ import interwovenStyles from '@initia/interwovenkit-react/styles.js'
 import App from './App.tsx'
 
 const CUSTOM_SIDEBAR_CSS = `
-  /* 🦾 REFINED SIDEBAR DRAWER (PHASE 1 RESTORED) ✨ */
+  /* Sidebar drawer styling for wallet widget */
   :host {
      --ik-modal-width: 440px !important;
   }
@@ -48,7 +46,6 @@ const CUSTOM_SIDEBAR_CSS = `
     opacity: 1 !important;
   }
 
-  /* ❌ MINIMAL CROSS SIGN FIX (NO BOX) ❌ */
   header, div[class*="header"], div[class*="top-bar"] {
     position: absolute !important;
     top: 20px !important;
@@ -95,7 +92,6 @@ const CUSTOM_SIDEBAR_CSS = `
     display: block !important;
   }
 
-  /* Hide redundant labels */
   h2, h2[class*="title"], [class*="group-label"] {
     display: none !important;
     height: 0 !important;
@@ -133,9 +129,9 @@ function injectIntoAllShadowRoots(parent: Element | ShadowRoot = document.body) 
   const allElements = (parent as Element).querySelectorAll ? (parent as Element).querySelectorAll('*') : [];
   allElements.forEach(el => {
     if (el.shadowRoot) {
-      if (!el.shadowRoot.querySelector('#final-clean-styles')) {
+      if (!el.shadowRoot.querySelector('#wallet-sidebar-styles')) {
         const style = document.createElement('style');
-        style.id = 'final-clean-styles';
+        style.id = 'wallet-sidebar-styles';
         style.innerHTML = String(interwovenStyles) + CUSTOM_SIDEBAR_CSS;
         el.shadowRoot.appendChild(style);
       }
@@ -156,7 +152,15 @@ function injectIntoAllShadowRoots(parent: Element | ShadowRoot = document.body) 
   });
 }
 
-setInterval(injectIntoAllShadowRoots, 500);
+// Use MutationObserver instead of setInterval for performance.
+// Only runs when DOM actually changes, not every 500ms.
+const observer = new MutationObserver(() => {
+  injectIntoAllShadowRoots();
+});
+observer.observe(document.body, { childList: true, subtree: true });
+
+// Run once on load as well
+requestAnimationFrame(() => injectIntoAllShadowRoots());
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

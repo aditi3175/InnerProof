@@ -26,6 +26,7 @@ export function useChat(walletAddress: string | undefined): UseChatReturn {
   const [sessionDuration, setSessionDuration] = useState(0);
   const moodScores = useRef<number[]>([]);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const messagesRef = useRef<ChatMessage[]>([]);
 
   // Timer for session duration
   useEffect(() => {
@@ -67,12 +68,16 @@ export function useChat(walletAddress: string | undefined): UseChatReturn {
       timestamp: Date.now(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    setMessages(prev => {
+      const updated = [...prev, userMessage];
+      messagesRef.current = updated;
+      return updated;
+    });
     setIsLoading(true);
     setError(null);
 
     try {
-      const currentMessages = [...messages, userMessage];
+      const currentMessages = messagesRef.current;
       const rawResponse = await sendMessage(
         currentMessages.filter(m => m.role !== 'assistant' || !m.content.startsWith('Welcome')),
         content.trim()
@@ -90,7 +95,11 @@ export function useChat(walletAddress: string | undefined): UseChatReturn {
         moodScore,
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages(prev => {
+        const updated = [...prev, assistantMessage];
+        messagesRef.current = updated;
+        return updated;
+      });
 
       // Save to localStorage if wallet connected
       if (walletAddress) {
@@ -108,7 +117,7 @@ export function useChat(walletAddress: string | undefined): UseChatReturn {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading, walletAddress]);
+  }, [isLoading, walletAddress]);
 
   const endSession = useCallback((): ChatSession | null => {
     if (!sessionActive) return null;

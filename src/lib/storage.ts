@@ -1,7 +1,7 @@
 // LocalStorage helpers with wallet-scoped keys
 
 const getKey = (walletAddress: string, namespace: string): string => {
-  return `innerproof_${walletAddress.slice(0, 12)}_${namespace}`;
+  return `innerproof_${walletAddress}_${namespace}`;
 };
 
 export const storage = {

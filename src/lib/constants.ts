@@ -1,6 +1,6 @@
 // Chain configuration
 export const CHAIN_ID = import.meta.env.VITE_CHAIN_ID || 'innerproof-1';
-export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '';
+export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0xced956677c796c53318fd38d5ea8651b73f822a';
 export const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
 // Module path for Move contract
