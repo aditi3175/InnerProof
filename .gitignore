@@ -48,3 +48,6 @@ fix_readme*.py
 fix_readme*.js
 README_fixed.md
 docker-compose.yml
+
+# Large binaries
+*.tar.gz
