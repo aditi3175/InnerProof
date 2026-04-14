@@ -1,235 +1,260 @@
-import { Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
-import type { ProgressData, MintParams } from '@/types';
-import { MIN_SESSIONS_TO_MINT, LEVEL_EMOJIS, LEVEL_COLORS } from '@/lib/constants';
+import { Loader2, Sparkles, CheckCircle2, Lock } from 'lucide-react';
+import type { MilestoneWithStatus, MintParams, ProgressData } from '@/types';
+import { ConfettiEffect } from './ConfettiEffect';
 
 interface MintButtonProps {
   progressData: ProgressData;
-  canMint: boolean;
+  milestones: MilestoneWithStatus[];
   isMinting: boolean;
+  mintingMilestoneId: number | null;
   mintSuccess: boolean;
   onMint: (params: MintParams) => void;
+  onResetMint: () => void;
 }
 
 export function MintButton({
   progressData,
-  canMint,
+  milestones,
   isMinting,
+  mintingMilestoneId,
   mintSuccess,
   onMint,
+  onResetMint,
 }: MintButtonProps) {
-  const handleMint = () => {
-    console.log('Mint button clicked! Improvement Score:', progressData.improvementScore);
-    // Map improvement score (0-100) to 1-5 scale for JSON files
-    // 0-20 -> 1, 21-40 -> 2, 41-60 -> 3, 61-80 -> 4, 81-100 -> 5
-    const scoreTier = Math.min(5, Math.max(1, Math.ceil(progressData.improvementScore / 20)));
+  const handleMint = (milestone: MilestoneWithStatus) => {
+    if (milestone.status !== 'unlocked' || isMinting) return;
     const baseCid = 'ipfs://bafybeih2kve2yp2a6p5aclb7ehzemkyaclsoj3mxegxfbtz3ip5yju4my4/';
-    const metadataUri = `${baseCid}${scoreTier}.json`;
-
-    console.log('Calling onMint with:', { metadataUri });
     onMint({
+      milestoneId: milestone.id,
       sessionsCompleted: progressData.sessionsCompleted,
       improvementScore: progressData.improvementScore,
       level: progressData.level,
       timestamp: Math.floor(Date.now() / 1000),
-      metadataUri,
+      metadataUri: `${baseCid}${milestone.ipfsFile}`,
     });
   };
 
-  const progress = Math.min(
-    100,
-    (progressData.sessionsCompleted / MIN_SESSIONS_TO_MINT) * 100
-  );
-
-  if (mintSuccess) {
-    return (
-      <div className="mint-success animate-fade-in-up">
-        <div className="mint-success-icon">
-          <CheckCircle2 size={48} />
-        </div>
-        <h3 className="heading-3">Soulbound Token Minted! 🎉</h3>
-        <p className="text-body">
-          Your progress is now verified on-chain. This token is non-transferable and
-          permanently bound to your wallet.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="mint-container animate-fade-in">
-      <div className="mint-card glass-card" style={{ padding: '32px' }}>
-        {/* Progress Ring */}
-        <div className="mint-progress-ring">
-          <svg viewBox="0 0 120 120" className="mint-ring-svg">
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
-              fill="none"
-              stroke="rgba(255,255,255,0.05)"
-              strokeWidth="8"
-            />
-            <circle
-              cx="60"
-              cy="60"
-              r="52"
-              fill="none"
-              stroke={canMint ? LEVEL_COLORS[progressData.level] : 'rgba(108, 99, 255, 0.3)'}
-              strokeWidth="8"
-              strokeLinecap="round"
-              strokeDasharray={`${progress * 3.27} 327`}
-              transform="rotate(-90 60 60)"
-              style={{ transition: 'stroke-dasharray 0.6s ease-out' }}
-            />
-          </svg>
-          <div className="mint-ring-content">
-            <span style={{ fontSize: '2rem' }}>{LEVEL_EMOJIS[progressData.level]}</span>
-            <span className="text-small">{progressData.level}</span>
-          </div>
-        </div>
+    <div className="milestones-container animate-fade-in">
+      <ConfettiEffect active={mintSuccess} />
 
-        {/* Info */}
-        <div className="mint-info">
-          <h3 className="heading-3" style={{ textAlign: 'center' }}>
-            {canMint ? 'Ready to Mint!' : 'Progress Toward Mint'}
-          </h3>
-          <p className="text-body" style={{ textAlign: 'center' }}>
-            {canMint
-              ? `You've completed ${progressData.sessionsCompleted} sessions! Your Level 1 SBT is ready.`
-              : `Complete ${MIN_SESSIONS_TO_MINT - progressData.sessionsCompleted} more session(s) to unlock minting.`}
-          </p>
+      <div className="milestones-header">
+        <h3 className="heading-3">Milestone Achievements</h3>
+        <p className="text-body">Earn Soulbound NFTs as you progress through your journey</p>
+      </div>
 
-          <div className="mint-stats">
-            <div className="mint-stat">
-              <span className="mint-stat-value">{progressData.sessionsCompleted}</span>
-              <span className="mint-stat-label">Sessions</span>
-            </div>
-            <div className="mint-stat">
-              <span className="mint-stat-value" style={{ color: LEVEL_COLORS[progressData.level] }}>
-                {progressData.improvementScore}%
-              </span>
-              <span className="mint-stat-label">Improvement</span>
-            </div>
-            <div className="mint-stat">
-              <span className="mint-stat-value">🔥 {progressData.currentStreak}</span>
-              <span className="mint-stat-label">Streak</span>
-            </div>
-          </div>
-        </div>
+      <div className="milestones-grid">
+        {milestones.map((m) => {
+          const isThisMinting = isMinting && mintingMilestoneId === m.id;
+          const progress = Math.min(100, (progressData.sessionsCompleted / m.sessions) * 100);
 
-        {/* Mint Button */}
-        <button
-          onClick={handleMint}
-          disabled={!canMint || isMinting}
-          className={`btn btn-lg ${canMint ? 'btn-mint' : 'btn-secondary'}`}
-          id="mint-sbt-btn"
-          style={{ width: '100%' }}
-        >
-          {isMinting ? (
-            <>
-              <Loader2 size={20} className="animate-spin-slow" />
-              Minting...
-            </>
-          ) : (
-            <>
-              <Sparkles size={20} />
-              {canMint ? 'Mint Soulbound Token' : 'Keep Going!'}
-            </>
-          )}
-        </button>
+          return (
+            <div
+              key={m.id}
+              className={`milestone-card glass-card ${m.status} ${isThisMinting ? 'minting' : ''}`}
+              style={{ '--milestone-color': m.color } as React.CSSProperties}
+            >
+              {/* Status badge */}
+              <div className="milestone-badge">
+                {m.status === 'minted' && <><CheckCircle2 size={12} /> Minted</>}
+                {m.status === 'unlocked' && <><Sparkles size={12} /> Ready!</>}
+                {m.status === 'locked' && <><Lock size={12} /> Locked</>}
+              </div>
+
+              {/* Emoji + tier */}
+              <div className="milestone-icon">
+                <span style={{ fontSize: m.status === 'locked' ? '2rem' : '2.5rem', filter: m.status === 'locked' ? 'grayscale(1) opacity(0.4)' : 'none' }}>
+                  {m.emoji}
+                </span>
+              </div>
+
+              <div className="milestone-tier" style={{ color: m.status === 'locked' ? 'var(--text-muted)' : m.color }}>
+                {m.tier}
+              </div>
+              <div className="milestone-name">{m.name}</div>
+
+              {/* Progress bar */}
+              <div className="milestone-progress">
+                <div className="milestone-progress-bar">
+                  <div
+                    className="milestone-progress-fill"
+                    style={{
+                      width: `${progress}%`,
+                      background: m.status === 'locked' ? 'rgba(255,255,255,0.15)' : `linear-gradient(90deg, ${m.color}, ${m.color}aa)`,
+                    }}
+                  />
+                </div>
+                <span className="milestone-progress-text">
+                  {Math.min(progressData.sessionsCompleted, m.sessions)}/{m.sessions} sessions
+                </span>
+              </div>
+
+              {/* Action */}
+              {m.status === 'unlocked' && (
+                <button
+                  onClick={() => handleMint(m)}
+                  disabled={isMinting}
+                  className="btn btn-lg milestone-mint-btn"
+                  style={{ background: `linear-gradient(135deg, ${m.color}, ${m.color}cc)` }}
+                >
+                  {isThisMinting ? (
+                    <><Loader2 size={16} className="animate-spin-slow" /> Minting...</>
+                  ) : (
+                    <><Sparkles size={16} /> Mint NFT</>
+                  )}
+                </button>
+              )}
+
+              {m.status === 'minted' && m.txHash && (
+                <div className="milestone-tx">
+                  tx: {m.txHash.slice(0, 12)}...
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <style>{`
-        .mint-container {
-          display: flex;
-          justify-content: center;
-        }
-
-        .mint-card {
-          max-width: 400px;
-          width: 100%;
+        .milestones-container {
           display: flex;
           flex-direction: column;
-          align-items: center;
           gap: 24px;
         }
 
-        .mint-progress-ring {
-          position: relative;
-          width: 120px;
-          height: 120px;
-        }
-
-        .mint-ring-svg {
-          width: 100%;
-          height: 100%;
-        }
-
-        .mint-ring-content {
-          position: absolute;
-          inset: 0;
+        .milestones-header {
           display: flex;
           flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          gap: 2px;
-        }
-
-        .mint-info {
-          display: flex;
-          flex-direction: column;
-          gap: 12px;
-          width: 100%;
-        }
-
-        .mint-stats {
-          display: flex;
-          justify-content: space-around;
-          padding: 16px 0;
-        }
-
-        .mint-stat {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
           gap: 4px;
         }
 
-        .mint-stat-value {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: var(--text-primary);
+        .milestones-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 16px;
         }
 
-        .mint-stat-label {
-          font-size: 0.75rem;
-          color: var(--text-muted);
-        }
-
-        .btn-mint {
-          background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
-          color: white;
-          box-shadow: 0 2px 20px rgba(108, 99, 255, 0.3), 0 2px 20px rgba(56, 178, 172, 0.2);
-          animation: pulseGlow 2s ease-in-out infinite;
-        }
-
-        .btn-mint:hover:not(:disabled) {
-          box-shadow: 0 4px 30px rgba(108, 99, 255, 0.5), 0 4px 30px rgba(56, 178, 172, 0.3);
-          transform: translateY(-2px);
-        }
-
-        .mint-success {
+        .milestone-card {
+          position: relative;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 16px;
-          padding: 48px 24px;
+          gap: 12px;
+          padding: 28px 20px;
           text-align: center;
+          transition: all 0.4s ease;
+          overflow: hidden;
         }
 
-        .mint-success-icon {
+        .milestone-card.unlocked {
+          border-color: var(--milestone-color) !important;
+          box-shadow: 0 0 30px color-mix(in srgb, var(--milestone-color) 20%, transparent);
+        }
+
+        .milestone-card.unlocked::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(135deg, color-mix(in srgb, var(--milestone-color) 8%, transparent), transparent);
+          pointer-events: none;
+        }
+
+        .milestone-card.minted {
+          border-color: color-mix(in srgb, var(--milestone-color) 40%, transparent) !important;
+        }
+
+        .milestone-card.minting {
+          animation: pulseGlow 1.5s ease-in-out infinite;
+        }
+
+        .milestone-badge {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.65rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          padding: 3px 10px;
+          border-radius: var(--radius-full);
+          background: var(--surface-glass);
+          border: 1px solid var(--surface-border);
+          color: var(--text-muted);
+        }
+
+        .milestone-card.unlocked .milestone-badge {
+          color: var(--milestone-color);
+          border-color: var(--milestone-color);
+          background: color-mix(in srgb, var(--milestone-color) 10%, transparent);
+        }
+
+        .milestone-card.minted .milestone-badge {
           color: var(--success);
-          animation: float 2s ease-in-out infinite;
+          border-color: var(--success);
+          background: rgba(74, 222, 128, 0.1);
+        }
+
+        .milestone-icon {
+          height: 56px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .milestone-tier {
+          font-size: 1.1rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+        }
+
+        .milestone-name {
+          font-size: 0.8rem;
+          color: var(--text-secondary);
+        }
+
+        .milestone-progress {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .milestone-progress-bar {
+          width: 100%;
+          height: 6px;
+          background: rgba(255,255,255,0.06);
+          border-radius: var(--radius-full);
+          overflow: hidden;
+        }
+
+        .milestone-progress-fill {
+          height: 100%;
+          border-radius: var(--radius-full);
+          transition: width 0.6s ease-out;
+        }
+
+        .milestone-progress-text {
+          font-size: 0.7rem;
+          color: var(--text-muted);
+        }
+
+        .milestone-mint-btn {
+          width: 100%;
+          color: #000 !important;
+          font-weight: 700;
+          border: none !important;
+        }
+
+        .milestone-mint-btn:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .milestone-tx {
+          font-size: 0.7rem;
+          color: var(--primary-400);
+          font-family: 'SF Mono', 'Fira Code', monospace;
         }
 
         .animate-spin-slow {

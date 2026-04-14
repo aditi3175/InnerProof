@@ -1,80 +1,84 @@
-import type { ProgressData } from '@/types';
-import { LEVEL_EMOJIS, LEVEL_COLORS } from '@/lib/constants';
-import { Shield, Calendar, TrendingUp, Flame } from 'lucide-react';
+import type { MilestoneWithStatus } from '@/types';
+import { Shield, Calendar, TrendingUp, Flame, Lock } from 'lucide-react';
 
 interface SBTViewerProps {
-  progressData: ProgressData;
-  hasMinted: boolean;
-  txHash?: string | null;
+  milestones: MilestoneWithStatus[];
+  mintedCount: number;
   walletAddress?: string;
 }
 
-export function SBTViewer({ progressData, hasMinted, txHash, walletAddress }: SBTViewerProps) {
-  if (!hasMinted) {
+export function SBTViewer({ milestones, mintedCount, walletAddress }: SBTViewerProps) {
+  if (mintedCount === 0) {
     return (
       <div className="sbt-empty">
         <Shield size={48} style={{ color: 'var(--text-muted)', opacity: 0.3 }} />
-        <p className="text-body">No Soulbound Token minted yet.</p>
-        <p className="text-small">Complete sessions and mint your first SBT to see it here.</p>
+        <p className="text-body">No Soulbound Tokens minted yet.</p>
+        <p className="text-small">Complete sessions and mint your first milestone NFT!</p>
       </div>
     );
   }
 
-  const levelColor = LEVEL_COLORS[progressData.level];
+  const minted = milestones.filter(m => m.status === 'minted');
 
   return (
-    <div className="sbt-viewer animate-fade-in-up">
-      <div className="sbt-card">
-        {/* Animated gradient border */}
-        <div className="sbt-card-glow" style={{ background: `linear-gradient(135deg, ${levelColor}, var(--primary-500))` }} />
+    <div className="sbt-gallery animate-fade-in-up">
+      <div className="sbt-gallery-grid">
+        {milestones.map((m) => (
+          <div
+            key={m.id}
+            className={`sbt-nft-card ${m.status === 'minted' ? 'minted' : 'future'}`}
+            style={{ '--nft-color': m.color } as React.CSSProperties}
+          >
+            {m.status === 'minted' ? (
+              <>
+                <div className="sbt-nft-shimmer" />
+                <div className="sbt-nft-inner">
+                  <div className="sbt-nft-header">
+                    <span className="sbt-nft-badge">SOULBOUND</span>
+                    <Shield size={14} style={{ color: m.color }} />
+                  </div>
 
-        <div className="sbt-card-inner">
-          {/* Header */}
-          <div className="sbt-header">
-            <span className="sbt-badge">SOULBOUND</span>
-            <Shield size={16} style={{ color: levelColor }} />
-          </div>
+                  <div className="sbt-nft-emoji">{m.emoji}</div>
+                  <div className="sbt-nft-tier" style={{ color: m.color }}>{m.tier}</div>
+                  <div className="sbt-nft-name">{m.name}</div>
 
-          {/* Level Display */}
-          <div className="sbt-level">
-            <span className="sbt-level-emoji">{LEVEL_EMOJIS[progressData.level]}</span>
-            <span className="sbt-level-name" style={{ color: levelColor }}>
-              {progressData.level}
-            </span>
-          </div>
+                  <div className="sbt-nft-stats">
+                    <div className="sbt-nft-stat">
+                      <Calendar size={12} />
+                      <span>{m.sessions} sessions</span>
+                    </div>
+                    {m.mintedAt && (
+                      <div className="sbt-nft-stat">
+                        <Flame size={12} />
+                        <span>{new Date(m.mintedAt).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                  </div>
 
-          {/* Stats */}
-          <div className="sbt-stats">
-            <div className="sbt-stat-row">
-              <Calendar size={14} />
-              <span>Sessions: {progressData.sessionsCompleted}</span>
-            </div>
-            <div className="sbt-stat-row">
-              <TrendingUp size={14} />
-              <span>Improvement: {progressData.improvementScore}%</span>
-            </div>
-            <div className="sbt-stat-row">
-              <Flame size={14} />
-              <span>Streak: {progressData.currentStreak} days</span>
-            </div>
-          </div>
+                  {m.txHash && (
+                    <div className="sbt-nft-tx">
+                      tx: {m.txHash.slice(0, 14)}...
+                    </div>
+                  )}
 
-          {/* Footer */}
-          <div className="sbt-footer">
-            <span className="text-small">Owner: {walletAddress?.slice(0, 10)}...</span>
-            {txHash && (
-              <span className="text-small" style={{ color: 'var(--primary-400)' }}>
-                tx: {txHash.slice(0, 10)}...
-              </span>
+                  <div className="sbt-nft-bound">
+                    <Shield size={10} />
+                    <span>Non-transferable</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="sbt-nft-inner sbt-nft-locked">
+                <Lock size={24} style={{ color: 'var(--text-muted)', opacity: 0.3 }} />
+                <span className="sbt-nft-emoji" style={{ fontSize: '1.8rem', filter: 'grayscale(1) opacity(0.3)' }}>
+                  {m.emoji}
+                </span>
+                <div className="sbt-nft-tier" style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{m.tier}</div>
+                <div className="sbt-nft-name" style={{ opacity: 0.4 }}>{m.sessions} sessions</div>
+              </div>
             )}
           </div>
-
-          {/* Non-transferable notice */}
-          <div className="sbt-notice">
-            <Shield size={12} />
-            <span>Non-transferable · Permanently bound to your wallet</span>
-          </div>
-        </div>
+        ))}
       </div>
 
       <style>{`
@@ -87,109 +91,136 @@ export function SBTViewer({ progressData, hasMinted, txHash, walletAddress }: SB
           text-align: center;
         }
 
-        .sbt-viewer {
-          display: flex;
-          justify-content: center;
+        .sbt-gallery-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 16px;
         }
 
-        .sbt-card {
+        .sbt-nft-card {
           position: relative;
-          width: 320px;
           border-radius: var(--radius-xl);
           overflow: hidden;
+          transition: transform 0.3s ease;
         }
 
-        .sbt-card-glow {
+        .sbt-nft-card.minted:hover {
+          transform: translateY(-4px);
+        }
+
+        .sbt-nft-shimmer {
           position: absolute;
           inset: 0;
-          opacity: 0.15;
+          background: linear-gradient(
+            135deg,
+            color-mix(in srgb, var(--nft-color) 15%, transparent),
+            transparent 50%,
+            color-mix(in srgb, var(--nft-color) 10%, transparent)
+          );
+          background-size: 200% 200%;
           animation: shimmer 3s ease-in-out infinite;
-          background-size: 200% auto;
+          pointer-events: none;
         }
 
-        .sbt-card-inner {
+        .sbt-nft-inner {
           position: relative;
-          padding: 28px;
-          background: rgba(15, 14, 23, 0.9);
+          padding: 20px;
+          background: rgba(15, 14, 23, 0.92);
           backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255,255,255,0.08);
           border-radius: var(--radius-xl);
           display: flex;
           flex-direction: column;
-          gap: 20px;
+          align-items: center;
+          gap: 10px;
         }
 
-        .sbt-header {
+        .sbt-nft-card.minted .sbt-nft-inner {
+          border-color: color-mix(in srgb, var(--nft-color) 30%, transparent);
+        }
+
+        .sbt-nft-locked {
+          min-height: 200px;
+          justify-content: center;
+          opacity: 0.5;
+        }
+
+        .sbt-nft-header {
+          width: 100%;
           display: flex;
           align-items: center;
           justify-content: space-between;
         }
 
-        .sbt-badge {
-          font-size: 0.65rem;
+        .sbt-nft-badge {
+          font-size: 0.55rem;
           font-weight: 800;
           letter-spacing: 0.15em;
           color: var(--text-muted);
-          padding: 4px 10px;
+          padding: 2px 8px;
           background: var(--surface-glass);
           border-radius: var(--radius-full);
           border: 1px solid var(--surface-border);
         }
 
-        .sbt-level {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-          padding: 16px 0;
-        }
-
-        .sbt-level-emoji {
-          font-size: 3.5rem;
+        .sbt-nft-emoji {
+          font-size: 2.5rem;
           animation: float 3s ease-in-out infinite;
         }
 
-        .sbt-level-name {
-          font-size: 1.5rem;
+        .sbt-nft-tier {
+          font-size: 1.1rem;
           font-weight: 800;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.08em;
         }
 
-        .sbt-stats {
+        .sbt-nft-name {
+          font-size: 0.75rem;
+          color: var(--text-secondary);
+        }
+
+        .sbt-nft-stats {
+          width: 100%;
           display: flex;
           flex-direction: column;
-          gap: 10px;
-          padding: 16px;
+          gap: 6px;
+          padding: 10px;
           background: var(--surface-glass);
           border-radius: var(--radius-md);
         }
 
-        .sbt-stat-row {
+        .sbt-nft-stat {
           display: flex;
           align-items: center;
-          gap: 10px;
+          gap: 8px;
           color: var(--text-secondary);
-          font-size: 0.85rem;
+          font-size: 0.75rem;
         }
 
-        .sbt-footer {
-          display: flex;
-          justify-content: space-between;
+        .sbt-nft-tx {
+          font-size: 0.65rem;
+          color: var(--primary-400);
+          font-family: 'SF Mono', 'Fira Code', monospace;
         }
 
-        .sbt-notice {
+        .sbt-nft-bound {
           display: flex;
           align-items: center;
-          justify-content: center;
-          gap: 6px;
-          padding: 8px;
+          gap: 4px;
+          padding: 4px 8px;
           background: rgba(74, 222, 128, 0.05);
-          border: 1px solid rgba(74, 222, 128, 0.15);
+          border: 1px solid rgba(74, 222, 128, 0.12);
           border-radius: var(--radius-md);
           color: var(--success);
-          font-size: 0.7rem;
+          font-size: 0.6rem;
           font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+          .sbt-gallery-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
       `}</style>
     </div>

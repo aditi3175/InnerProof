@@ -8,12 +8,12 @@ import {
   getLevelProgress,
   calculateStreak,
 } from '@/lib/sentiment';
-import { MIN_SESSIONS_TO_MINT } from '@/lib/constants';
+
 
 interface UseMoodTrackerReturn {
   moodHistory: MoodHistory;
   progressData: ProgressData;
-  canMint: boolean;
+
   addMoodEntry: (sessionScore: number, selfRating: number) => void;
   getMoodTrend: () => MoodEntry[];
 }
@@ -103,12 +103,11 @@ export function useMoodTracker(walletAddress: string | undefined): UseMoodTracke
     return moodHistory.entries.slice(-30); // Last 30 entries
   }, [moodHistory]);
 
-  const canMint = progressData.sessionsCompleted >= MIN_SESSIONS_TO_MINT;
+
 
   return {
     moodHistory,
     progressData,
-    canMint,
     addMoodEntry,
     getMoodTrend,
   };

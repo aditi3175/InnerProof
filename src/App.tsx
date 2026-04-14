@@ -14,59 +14,32 @@ import { useAddress, useWallet } from './providers/WalletProvider';
 function AppContent() {
   const address = useAddress();
   const { onboard, disconnect, signArbitrary } = useWallet();
-  // FORCE STRICT CHECK: Only connected if we have a real 'init' address
   const isConnected = !!address && typeof address === 'string' && address.startsWith('init');
   const [sessionActive, setSessionActive] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
 
-  const { progressData, canMint, addMoodEntry, getMoodTrend } =
-    useMoodTracker(address);
-  const { isMinting, mintSuccess, txHash, mint } = useMintSBT(address);
+  const { progressData, addMoodEntry, getMoodTrend } = useMoodTracker(address);
+  const {
+    isMinting,
+    mintingMilestoneId,
+    mintSuccess,
+    txHash,
+    milestones,
+    mintedCount,
+    mint,
+    resetMintState,
+  } = useMintSBT(address);
 
-  // Persist mint state to localStorage
-  const [persistedMint, setPersistedMint] = useState(false);
-  const [persistedTxHash, setPersistedTxHash] = useState<string | null>(null);
-
-  // Load persisted mint state on wallet connect
-  useEffect(() => {
-    if (address) {
-      const saved = storage.get<{ minted: boolean; txHash: string | null }>(address, 'mint_state');
-      if (saved?.minted) {
-        setPersistedMint(true);
-        setPersistedTxHash(saved.txHash);
-      }
-    }
-  }, [address]);
-
-  // Save when minting succeeds
-  useEffect(() => {
-    if (mintSuccess && address) {
-      storage.set(address, 'mint_state', { minted: true, txHash });
-      setPersistedMint(true);
-      setPersistedTxHash(txHash);
-    }
-  }, [mintSuccess, txHash, address]);
-
-  const effectiveMintSuccess = mintSuccess || persistedMint;
-  const effectiveTxHash = txHash || persistedTxHash;
-
-  // Challenge for verification - ensures a Keplr popup appears even if already authorized
   const handleVerify = useCallback(async () => {
     if (!isConnected || !address) return;
     try {
-      console.log('Requesting sign-in signature for verification...');
-      // This will force a Keplr popup to appear
       await signArbitrary(`Sign in to InnerProof: ${new Date().toLocaleDateString()}`);
       setIsVerified(true);
-      console.log('Verification success!');
     } catch (e) {
-      console.error('Verification failed or rejected:', e);
-      // If user rejects, we treat them as not verified yet
       setIsVerified(false);
     }
   }, [isConnected, address, signArbitrary]);
 
-  // If connected but not verified, we lock the session
   useEffect(() => {
     if (!isConnected) {
       setIsVerified(false);
@@ -74,39 +47,33 @@ function AppContent() {
     }
   }, [isConnected]);
 
-  const handleConnect = useCallback(() => {
-    onboard();
-  }, [onboard]);
+  const handleConnect = useCallback(() => { onboard(); }, [onboard]);
 
   const handleDisconnect = useCallback(() => {
     disconnect();
-    // Clear SDK state and force fresh connection logs
     localStorage.removeItem('wallet-widget-connector');
     localStorage.removeItem('initia-widget-last-connected');
     setSessionActive(false);
     setIsVerified(false);
   }, [disconnect]);
 
-  // Determine if we show the "Start Session" (Only if connected AND verified)
   const canStartSession = isConnected && isVerified;
 
   return (
     <BrowserRouter>
       <Routes>
-        {/* Landing page without sidebar */}
         <Route
           path="/"
           element={
             <LandingPage
-              isConnected={canStartSession} // Only show Start Session if verified
+              isConnected={canStartSession}
               onConnect={handleConnect}
-              onVerify={handleVerify} // Pass verify handler to landing
-              isWalletConnected={isConnected} // State to know we need to show verify button
+              onVerify={handleVerify}
+              isWalletConnected={isConnected}
             />
           }
         />
 
-        {/* App pages with sidebar layout */}
         <Route
           path="/chat"
           element={
@@ -141,10 +108,13 @@ function AppContent() {
                 isConnected={isConnected}
                 progressData={progressData}
                 moodTrend={getMoodTrend()}
-                canMint={canMint}
+                milestones={milestones}
+                mintedCount={mintedCount}
                 isMinting={isMinting}
-                mintSuccess={effectiveMintSuccess}
+                mintingMilestoneId={mintingMilestoneId}
+                mintSuccess={mintSuccess}
                 onMint={mint}
+                onResetMint={resetMintState}
               />
             </Layout>
           }
@@ -164,8 +134,8 @@ function AppContent() {
                 isConnected={isConnected}
                 walletAddress={address}
                 progressData={progressData}
-                hasMinted={effectiveMintSuccess}
-                txHash={effectiveTxHash}
+                milestones={milestones}
+                mintedCount={mintedCount}
               />
             </Layout>
           }

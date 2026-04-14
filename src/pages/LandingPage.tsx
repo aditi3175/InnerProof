@@ -345,7 +345,7 @@ export function LandingPage({
           align-items: center;
           justify-content: center;
           gap: 0;
-          flex-wrap: wrap;
+          flex-wrap: nowrap;
         }
 
         .step-item {

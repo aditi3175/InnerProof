@@ -1,19 +1,18 @@
-/// InnerProof Soulbound Progress Token
+/// InnerProof Soulbound Progress Token (Multi-Milestone Version)
 ///
-/// A non-transferable NFT that records a user's mental health journey progress.
-/// The token has `key` but NOT `store`, making it permanently bound to the minting wallet.
-/// Only progress scores are stored - never raw chat data.
-module innerproof::soulbound_nft {
+/// A non-transferable NFT collection that records a user's mental health journey progress.
+/// Instead of a single SBT, users can now collect multiple badges for different milestones.
+module innerproof::soulbound_nft_v2 {
     use std::string::String;
     use std::signer;
     use std::event;
+    use std::vector;
 
     // ==================== Structs ====================
 
     /// The Soulbound Progress Token
     /// Has `key` but NOT `store` - this makes it non-transferable.
-    /// Without `store`, the standard transfer functions cannot move this object.
-    struct ProgressSBT has key {
+    struct ProgressSBT has key, drop, store {
         /// Wallet address of the owner
         owner: address,
         /// Number of therapy sessions completed
@@ -30,6 +29,11 @@ module innerproof::soulbound_nft {
         metadata_uri: String,
     }
 
+    /// A collection of SBTs for a single user
+    struct SBTCollection has key {
+        tokens: vector<ProgressSBT>,
+    }
+
     // ==================== Events ====================
 
     #[event]
@@ -42,30 +46,17 @@ module innerproof::soulbound_nft {
         metadata_uri: String,
     }
 
-    #[event]
-    /// Emitted when an existing SBT is updated with new progress
-    struct UpdateEvent has drop, store {
-        owner: address,
-        level: String,
-        sessions_completed: u64,
-        improvement_score: u64,
-        metadata_uri: String,
-    }
-
     // ==================== Error Codes ====================
 
-    /// The account already has an SBT
-    const E_ALREADY_HAS_SBT: u64 = 1;
-    /// The account does not have an SBT
-    const E_NO_SBT: u64 = 2;
     /// Invalid improvement score (must be 0-10000)
     const E_INVALID_SCORE: u64 = 3;
+    /// The account does not have a collection
+    const E_NO_COLLECTION: u64 = 4;
 
     // ==================== Entry Functions ====================
 
-    /// Mint a new Soulbound Progress Token to the caller.
-    /// This can only be called once per account.
-    /// The SBT is permanently bound and cannot be transferred.
+    /// Mint a new milestone NFT. 
+    /// Can be called multiple times for different progress levels.
     public entry fun mint(
         account: &signer,
         sessions_completed: u64,
@@ -73,16 +64,13 @@ module innerproof::soulbound_nft {
         level: String,
         timestamp: u64,
         metadata_uri: String,
-    ) {
+    ) acquires SBTCollection {
         let addr = signer::address_of(account);
-
-        // Ensure the account doesn't already have an SBT
-        assert!(!exists<ProgressSBT>(addr), E_ALREADY_HAS_SBT);
 
         // Validate score range
         assert!(improvement_score <= 10000, E_INVALID_SCORE);
 
-        // Create and bind the SBT to the account
+        // Create the individual SBT
         let sbt = ProgressSBT {
             owner: addr,
             sessions_completed,
@@ -93,7 +81,18 @@ module innerproof::soulbound_nft {
             metadata_uri,
         };
 
-        move_to(account, sbt);
+        // Initialize collection if it doesn't exist
+        if (!exists<SBTCollection>(addr)) {
+            let collection = SBTCollection {
+                tokens: vector::empty<ProgressSBT>(),
+            };
+            vector::push_back(&mut collection.tokens, sbt);
+            move_to(account, collection);
+        } else {
+            // Add to existing collection
+            let collection = borrow_global_mut<SBTCollection>(addr);
+            vector::push_back(&mut collection.tokens, sbt);
+        };
 
         // Emit mint event
         event::emit(MintEvent {
@@ -105,68 +104,37 @@ module innerproof::soulbound_nft {
         });
     }
 
-    /// Update an existing SBT with new progress data.
-    /// Can only be called by the SBT owner.
-    public entry fun update_progress(
-        account: &signer,
-        sessions_completed: u64,
-        improvement_score: u64,
-        level: String,
-        timestamp: u64,
-        metadata_uri: String,
-    ) acquires ProgressSBT {
-        let addr = signer::address_of(account);
-
-        // Ensure the account has an SBT
-        assert!(exists<ProgressSBT>(addr), E_NO_SBT);
-
-        // Validate score range
-        assert!(improvement_score <= 10000, E_INVALID_SCORE);
-
-        // Update the SBT
-        let sbt = borrow_global_mut<ProgressSBT>(addr);
-        sbt.sessions_completed = sessions_completed;
-        sbt.improvement_score = improvement_score;
-        sbt.level = level;
-        sbt.last_updated = timestamp;
-        sbt.metadata_uri = metadata_uri;
-
-        // Emit update event
-        event::emit(UpdateEvent {
-            owner: addr,
-            level,
-            sessions_completed,
-            improvement_score,
-            metadata_uri,
-        });
-    }
-
     // ==================== View Functions ====================
 
-    /// Check if an address has minted an SBT
+    /// Check if an address has any minted SBTs
     #[view]
-    public fun has_sbt(addr: address): bool {
-        exists<ProgressSBT>(addr)
+    public fun has_tokens(addr: address): bool {
+        exists<SBTCollection>(addr)
     }
 
-    /// Get the progress level of an address's SBT
+    /// Get the number of tokens in user's collection
     #[view]
-    public fun get_level(addr: address): String acquires ProgressSBT {
-        assert!(exists<ProgressSBT>(addr), E_NO_SBT);
-        borrow_global<ProgressSBT>(addr).level
+    public fun get_token_count(addr: address): u64 acquires SBTCollection {
+        if (!exists<SBTCollection>(addr)) {
+            0
+        } else {
+            let collection = borrow_global<SBTCollection>(addr);
+            vector::length(&collection.tokens)
+        }
     }
 
-    /// Get the number of sessions completed
+    /// Get details of a specific token by index
     #[view]
-    public fun get_sessions(addr: address): u64 acquires ProgressSBT {
-        assert!(exists<ProgressSBT>(addr), E_NO_SBT);
-        borrow_global<ProgressSBT>(addr).sessions_completed
-    }
-
-    /// Get the improvement score (in basis points)
-    #[view]
-    public fun get_improvement_score(addr: address): u64 acquires ProgressSBT {
-        assert!(exists<ProgressSBT>(addr), E_NO_SBT);
-        borrow_global<ProgressSBT>(addr).improvement_score
+    public fun get_token_at(addr: address, index: u64): (String, u64, u64, u64, String) acquires SBTCollection {
+        assert!(exists<SBTCollection>(addr), E_NO_COLLECTION);
+        let collection = borrow_global<SBTCollection>(addr);
+        let sbt = vector::borrow(&collection.tokens, index);
+        (
+            sbt.level,
+            sbt.sessions_completed,
+            sbt.improvement_score,
+            sbt.minted_at,
+            sbt.metadata_uri
+        )
     }
 }

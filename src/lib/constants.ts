@@ -1,11 +1,57 @@
+import type { Milestone } from '@/types';
+
 // Chain configuration
-export const CHAIN_ID = import.meta.env.VITE_CHAIN_ID || 'innerproof-1';
+export const CHAIN_ID = import.meta.env.VITE_CHAIN_ID || 'initiation-2';
 export const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS || '0xced956677c796c53318fd38d5ea8651b73f822a';
 export const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
 
 // Module path for Move contract
 export const MODULE_ADDRESS = CONTRACT_ADDRESS;
 export const MODULE_NAME = 'soulbound_nft';
+
+// Milestone definitions
+export const MILESTONES: Milestone[] = [
+  {
+    id: 1,
+    sessions: 5,
+    tier: 'Bronze',
+    name: 'First Steps',
+    emoji: '🌱',
+    description: 'Complete 5 therapy sessions',
+    color: '#CD7F32',
+    ipfsFile: '1.json',
+  },
+  {
+    id: 2,
+    sessions: 10,
+    tier: 'Silver',
+    name: 'Growing Strong',
+    emoji: '🌿',
+    description: 'Complete 10 therapy sessions',
+    color: '#C0C0C0',
+    ipfsFile: '2.json',
+  },
+  {
+    id: 3,
+    sessions: 20,
+    tier: 'Gold',
+    name: 'In Full Bloom',
+    emoji: '🌸',
+    description: 'Complete 20 therapy sessions',
+    color: '#FFD700',
+    ipfsFile: '3.json',
+  },
+  {
+    id: 4,
+    sessions: 50,
+    tier: 'Diamond',
+    name: 'Radiant Soul',
+    emoji: '✨',
+    description: 'Complete 50 therapy sessions',
+    color: '#B9F2FF',
+    ipfsFile: '4.json',
+  },
+];
 
 // Progress level thresholds
 export const LEVEL_THRESHOLDS = {
@@ -15,9 +61,6 @@ export const LEVEL_THRESHOLDS = {
   Flourish: { min: 61, max: 80 },
   Radiant: { min: 81, max: 100 },
 } as const;
-
-// Minimum sessions required to mint SBT
-export const MIN_SESSIONS_TO_MINT = 5;
 
 // Level colors for UI
 export const LEVEL_COLORS: Record<string, string> = {

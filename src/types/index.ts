@@ -4,7 +4,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: number;
-  moodScore?: number; // 1-10 scale from AI
+  moodScore?: number;
 }
 
 export interface ChatSession {
@@ -13,15 +13,15 @@ export interface ChatSession {
   endedAt?: number;
   messages: ChatMessage[];
   averageMood: number;
-  selfRating?: number; // User's self-assessment at end
+  selfRating?: number;
 }
 
 // ========== Mood Types ==========
 export interface MoodEntry {
-  date: string; // ISO date string
-  sessionScore: number; // AI-derived score
-  selfRating: number; // User's self-rating 1-5
-  combinedScore: number; // Weighted average
+  date: string;
+  sessionScore: number;
+  selfRating: number;
+  combinedScore: number;
   sessionsCompleted: number;
 }
 
@@ -38,10 +38,36 @@ export type ProgressLevel = 'Seed' | 'Sprout' | 'Bloom' | 'Flourish' | 'Radiant'
 
 export interface ProgressData {
   level: ProgressLevel;
-  improvementScore: number; // 0-100
+  improvementScore: number;
   sessionsCompleted: number;
   currentStreak: number;
-  levelProgress: number; // 0-100 within current level
+  levelProgress: number;
+}
+
+// ========== Milestone Types ==========
+export interface Milestone {
+  id: number;
+  sessions: number;
+  tier: string;
+  name: string;
+  emoji: string;
+  description: string;
+  color: string;
+  ipfsFile: string;
+}
+
+export type MilestoneStatus = 'locked' | 'unlocked' | 'minted';
+
+export interface MintedMilestone {
+  milestoneId: number;
+  txHash: string;
+  mintedAt: number;
+}
+
+export interface MilestoneWithStatus extends Milestone {
+  status: MilestoneStatus;
+  txHash?: string;
+  mintedAt?: number;
 }
 
 // ========== SBT Types ==========
@@ -55,6 +81,7 @@ export interface SoulboundToken {
 }
 
 export interface MintParams {
+  milestoneId: number;
   sessionsCompleted: number;
   improvementScore: number;
   level: string;
