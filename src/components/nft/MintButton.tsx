@@ -40,7 +40,9 @@ export function MintButton({
 
       <div className="milestones-header">
         <h3 className="heading-3">Milestone Achievements</h3>
-        <p className="text-body">Earn Soulbound NFTs as you progress through your journey</p>
+        <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: '0.85rem', color: 'var(--platinum)' }}>
+          proof of resilience
+        </span>
       </div>
 
       <div className="milestones-grid">
@@ -51,19 +53,20 @@ export function MintButton({
           return (
             <div
               key={m.id}
-              className={`milestone-card glass-card ${m.status} ${isThisMinting ? 'minting' : ''}`}
+              className={`milestone-card ${m.status} ${isThisMinting ? 'minting' : ''}`}
               style={{ '--milestone-color': m.color } as React.CSSProperties}
             >
-              {/* Status badge */}
-              <div className="milestone-badge">
-                {m.status === 'minted' && <><CheckCircle2 size={12} /> Minted</>}
-                {m.status === 'unlocked' && <><Sparkles size={12} /> Ready!</>}
-                {m.status === 'locked' && <><Lock size={12} /> Locked</>}
+              {/* Holographic shimmer overlay */}
+              {m.status !== 'locked' && <div className="holo-shimmer" />}
+
+              <div className={`milestone-badge ${m.status}`}>
+                {m.status === 'minted' && <><CheckCircle2 size={10} /> Minted</>}
+                {m.status === 'unlocked' && <><Sparkles size={10} /> Ready</>}
+                {m.status === 'locked' && <><Lock size={10} /> Locked</>}
               </div>
 
-              {/* Emoji + tier */}
               <div className="milestone-icon">
-                <span style={{ fontSize: m.status === 'locked' ? '2rem' : '2.5rem', filter: m.status === 'locked' ? 'grayscale(1) opacity(0.4)' : 'none' }}>
+                <span style={{ fontSize: m.status === 'locked' ? '1.8rem' : '2.2rem', filter: m.status === 'locked' ? 'grayscale(1) opacity(0.25)' : 'none' }}>
                   {m.emoji}
                 </span>
               </div>
@@ -73,14 +76,14 @@ export function MintButton({
               </div>
               <div className="milestone-name">{m.name}</div>
 
-              {/* Progress bar */}
               <div className="milestone-progress">
                 <div className="milestone-progress-bar">
                   <div
                     className="milestone-progress-fill"
                     style={{
                       width: `${progress}%`,
-                      background: m.status === 'locked' ? 'rgba(255,255,255,0.15)' : `linear-gradient(90deg, ${m.color}, ${m.color}aa)`,
+                      background: m.status === 'locked' ? 'rgba(255,255,255,0.08)' : m.color,
+                      boxShadow: m.status !== 'locked' ? `0 0 12px ${m.color}66` : 'none',
                     }}
                   />
                 </div>
@@ -89,18 +92,16 @@ export function MintButton({
                 </span>
               </div>
 
-              {/* Action */}
               {m.status === 'unlocked' && (
                 <button
                   onClick={() => handleMint(m)}
                   disabled={isMinting}
                   className="btn btn-lg milestone-mint-btn"
-                  style={{ background: `linear-gradient(135deg, ${m.color}, ${m.color}cc)` }}
                 >
                   {isThisMinting ? (
-                    <><Loader2 size={16} className="animate-spin-slow" /> Minting...</>
+                    <><Loader2 size={14} className="animate-spin-slow" /> Minting...</>
                   ) : (
-                    <><Sparkles size={16} /> Mint NFT</>
+                    <><Sparkles size={14} /> Mint NFT</>
                   )}
                 </button>
               )}
@@ -142,74 +143,96 @@ export function MintButton({
           gap: 12px;
           padding: 28px 20px;
           text-align: center;
-          transition: all 0.4s ease;
+          background: var(--glass-bg);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid var(--glass-border);
+          border-radius: var(--radius-xl);
+          transition: all var(--transition-slow);
           overflow: hidden;
         }
 
-        .milestone-card.unlocked {
-          border-color: var(--milestone-color) !important;
-          box-shadow: 0 0 30px color-mix(in srgb, var(--milestone-color) 20%, transparent);
+        .milestone-card:hover {
+          border-color: var(--glass-border-hover);
+          transform: translateY(-4px);
+          box-shadow: var(--glow-white-strong);
         }
 
-        .milestone-card.unlocked::before {
-          content: '';
+        /* Holographic shimmer */
+        .holo-shimmer {
           position: absolute;
           inset: 0;
-          background: linear-gradient(135deg, color-mix(in srgb, var(--milestone-color) 8%, transparent), transparent);
+          background: linear-gradient(
+            105deg,
+            transparent 20%,
+            rgba(255, 255, 255, 0.03) 30%,
+            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0.03) 70%,
+            transparent 80%
+          );
+          background-size: 200% 100%;
+          opacity: 0;
+          transition: opacity 0.4s ease;
           pointer-events: none;
+          border-radius: inherit;
         }
 
-        .milestone-card.minted {
-          border-color: color-mix(in srgb, var(--milestone-color) 40%, transparent) !important;
+        .milestone-card:hover .holo-shimmer {
+          opacity: 1;
+          animation: shimmerHolo 1.5s ease-in-out;
+        }
+
+        .milestone-card.unlocked {
+          border-color: rgba(255,255,255,0.15);
         }
 
         .milestone-card.minting {
-          animation: pulseGlow 1.5s ease-in-out infinite;
+          box-shadow: 0 0 40px rgba(255,255,255,0.08);
         }
 
         .milestone-badge {
           display: flex;
           align-items: center;
           gap: 4px;
-          font-size: 0.65rem;
+          font-size: 0.6rem;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.1em;
           padding: 3px 10px;
           border-radius: var(--radius-full);
-          background: var(--surface-glass);
-          border: 1px solid var(--surface-border);
+          border: 1px solid var(--glass-border);
           color: var(--text-muted);
+          backdrop-filter: blur(8px);
         }
 
-        .milestone-card.unlocked .milestone-badge {
-          color: var(--milestone-color);
-          border-color: var(--milestone-color);
-          background: color-mix(in srgb, var(--milestone-color) 10%, transparent);
+        .milestone-badge.unlocked {
+          color: var(--text-primary);
+          border-color: var(--glass-border-hover);
+          background: var(--glass-bg-hover);
         }
 
-        .milestone-card.minted .milestone-badge {
+        .milestone-badge.minted {
           color: var(--success);
-          border-color: var(--success);
-          background: rgba(74, 222, 128, 0.1);
+          border-color: rgba(163, 230, 53, 0.2);
+          background: rgba(163, 230, 53, 0.06);
         }
 
         .milestone-icon {
-          height: 56px;
+          height: 52px;
           display: flex;
           align-items: center;
           justify-content: center;
         }
 
         .milestone-tier {
-          font-size: 1.1rem;
+          font-size: 1.05rem;
           font-weight: 800;
           text-transform: uppercase;
           letter-spacing: 0.08em;
         }
 
         .milestone-name {
-          font-size: 0.8rem;
+          font-size: 0.72rem;
           color: var(--text-secondary);
         }
 
@@ -222,8 +245,8 @@ export function MintButton({
 
         .milestone-progress-bar {
           width: 100%;
-          height: 6px;
-          background: rgba(255,255,255,0.06);
+          height: 4px;
+          background: rgba(255,255,255,0.04);
           border-radius: var(--radius-full);
           overflow: hidden;
         }
@@ -235,30 +258,27 @@ export function MintButton({
         }
 
         .milestone-progress-text {
-          font-size: 0.7rem;
+          font-size: 0.62rem;
           color: var(--text-muted);
         }
 
         .milestone-mint-btn {
           width: 100%;
-          color: #000 !important;
+          background: #ffffff !important;
+          color: #000000 !important;
           font-weight: 700;
           border: none !important;
         }
 
         .milestone-mint-btn:hover:not(:disabled) {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+          transform: translateY(-2px) scale(1.02);
+          box-shadow: 0 8px 30px rgba(255, 255, 255, 0.15);
         }
 
         .milestone-tx {
-          font-size: 0.7rem;
-          color: var(--primary-400);
-          font-family: 'SF Mono', 'Fira Code', monospace;
-        }
-
-        .animate-spin-slow {
-          animation: spin 1.5s linear infinite;
+          font-size: 0.62rem;
+          color: var(--text-muted);
+          font-family: var(--font-mono);
         }
       `}</style>
     </div>

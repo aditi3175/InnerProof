@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
+import { useMouseSpotlight } from '@/hooks/useMouseSpotlight';
 
 interface LayoutProps {
   children: ReactNode;
@@ -19,9 +20,24 @@ export function Layout({
   onDisconnect,
   sessionActive,
 }: LayoutProps) {
+  const { position, visible } = useMouseSpotlight();
+
   return (
     <div className="app-layout">
-      <div className="bg-mesh" />
+      {/* Ambient drifting background */}
+      <div className="ambient-bg" />
+      <div className="grain-overlay" />
+
+      {/* Mouse spotlight */}
+      <div
+        className="spotlight"
+        style={{
+          left: position.x,
+          top: position.y,
+          opacity: visible ? 1 : 0,
+        }}
+      />
+
       <Sidebar />
       <main className="main-content">
         <Navbar
@@ -40,6 +56,7 @@ export function Layout({
         .app-layout {
           display: flex;
           min-height: 100vh;
+          position: relative;
         }
 
         .main-content {
@@ -48,11 +65,13 @@ export function Layout({
           display: flex;
           flex-direction: column;
           min-height: 100vh;
+          position: relative;
+          z-index: 2;
         }
 
         .page-content {
           flex: 1;
-          padding: 32px;
+          padding: 40px;
           max-width: 1200px;
           width: 100%;
           margin: 0 auto;
@@ -65,7 +84,7 @@ export function Layout({
           }
 
           .page-content {
-            padding: 16px;
+            padding: 20px;
           }
         }
       `}</style>

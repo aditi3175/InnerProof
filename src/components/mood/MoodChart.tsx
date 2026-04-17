@@ -20,57 +20,61 @@ export function MoodChart({ data }: MoodChartProps) {
   if (chartData.length === 0) {
     return (
       <div className="mood-chart-empty">
-        <span style={{ fontSize: '2rem' }}>📊</span>
+        <span style={{ fontSize: '1.5rem', opacity: 0.2 }}>📊</span>
         <p className="text-body">Complete sessions to see your progress chart</p>
       </div>
     );
   }
 
   return (
-    <div className="mood-chart-container animate-fade-in glass" style={{ padding: '24px', borderRadius: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h3 className="heading-3" style={{ fontSize: '1.2rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ color: '#6c63ff' }}>📈</span> Progress Analytics
-        </h3>
+    <div className="mood-chart-container animate-fade-in">
+      <div className="mood-chart-header">
+        <div>
+          <h3 className="heading-3">Progress Analytics</h3>
+          <span style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontSize: '0.8rem', color: 'var(--platinum)' }}>
+            tracking your resilience
+          </span>
+        </div>
         <div className="chart-legend">
           <div className="chart-legend-item">
-            <span className="chart-legend-dot glow-purple"></span>
+            <span className="chart-legend-dot chart-dot-primary"></span>
             Combined
           </div>
           <div className="chart-legend-item">
-            <span className="chart-legend-dot glow-cyan"></span>
+            <span className="chart-legend-dot chart-dot-secondary"></span>
             AI Rating
           </div>
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={chartData} margin={{ top: 20, right: 10, left: -20, bottom: 0 }}>
           <defs>
-            <linearGradient id="gradientScore" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#6c63ff" stopOpacity={0.5} />
-              <stop offset="100%" stopColor="#6c63ff" stopOpacity={0} />
+            <linearGradient id="glowScore" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity={0.2} />
+              <stop offset="50%" stopColor="#ffffff" stopOpacity={0.05} />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
             </linearGradient>
-            <linearGradient id="gradientAi" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00f2fe" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#4facfe" stopOpacity={0} />
+            <linearGradient id="glowAi" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity={0.08} />
+              <stop offset="100%" stopColor="#ffffff" stopOpacity={0} />
             </linearGradient>
-            <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
+            <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur" />
               <feComposite in="SourceGraphic" in2="blur" operator="over" />
             </filter>
           </defs>
           
           <XAxis
             dataKey="date"
-            tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 500 }}
-            axisLine={{ stroke: 'rgba(255,255,255,0.05)' }}
+            tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 500 }}
+            axisLine={{ stroke: 'rgba(255,255,255,0.04)' }}
             tickLine={false}
             dy={10}
           />
           <YAxis
             domain={[0, 100]}
-            tick={{ fill: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 500 }}
+            tick={{ fill: 'rgba(255,255,255,0.3)', fontSize: 11, fontWeight: 500 }}
             axisLine={false}
             tickLine={false}
             dx={-10}
@@ -78,39 +82,39 @@ export function MoodChart({ data }: MoodChartProps) {
           
           <Tooltip
             contentStyle={{
-              background: 'rgba(15, 14, 23, 0.75)',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '16px',
-              color: '#fffffe',
-              padding: '12px 16px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+              background: 'rgba(10, 10, 10, 0.9)',
               backdropFilter: 'blur(20px)',
-              WebkitBackdropFilter: 'blur(20px)'
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '12px',
+              color: '#ffffff',
+              padding: '12px 16px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6)',
             }}
-            itemStyle={{ fontSize: '0.9rem', fontWeight: 600, padding: '4px 0' }}
-            labelStyle={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.8rem', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}
-            cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 1, strokeDasharray: '4 4' }}
+            itemStyle={{ fontSize: '0.85rem', fontWeight: 600, padding: '2px 0' }}
+            labelStyle={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }}
+            cursor={{ stroke: 'rgba(255,255,255,0.06)', strokeWidth: 1 }}
           />
 
           <Area
             type="monotone"
             dataKey="ai"
-            stroke="#00f2fe"
-            strokeWidth={2}
-            fill="url(#gradientAi)"
+            stroke="rgba(255,255,255,0.3)"
+            strokeWidth={1.5}
+            fill="url(#glowAi)"
             name="AI Assessment"
-            dot={{ r: 4, fill: '#00f2fe', strokeWidth: 0, filter: 'url(#glow)' }}
-            activeDot={{ r: 6, fill: '#fff', stroke: '#00f2fe', strokeWidth: 2, filter: 'url(#glow)' }}
+            dot={false}
+            strokeDasharray="4 4"
           />
           <Area
             type="monotone"
             dataKey="score"
-            stroke="#6c63ff"
-            strokeWidth={3}
-            fill="url(#gradientScore)"
+            stroke="#ffffff"
+            strokeWidth={2.5}
+            fill="url(#glowScore)"
             name="Combined Score"
-            dot={{ r: 5, fill: '#6c63ff', stroke: '#fff', strokeWidth: 2, filter: 'url(#glow)' }}
-            activeDot={{ r: 8, fill: '#fff', stroke: '#6c63ff', strokeWidth: 3, filter: 'url(#glow)' }}
+            filter="url(#neonGlow)"
+            dot={{ r: 3, fill: '#ffffff', strokeWidth: 0 }}
+            activeDot={{ r: 6, fill: '#ffffff', stroke: 'rgba(255,255,255,0.3)', strokeWidth: 4 }}
           />
         </AreaChart>
       </ResponsiveContainer>
@@ -118,8 +122,12 @@ export function MoodChart({ data }: MoodChartProps) {
       <style>{`
         .mood-chart-container {
           width: 100%;
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+          padding: 28px;
+          background: var(--glass-bg);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
+          border: 1px solid var(--glass-border);
+          border-radius: var(--radius-xl);
           position: relative;
           overflow: hidden;
         }
@@ -129,7 +137,14 @@ export function MoodChart({ data }: MoodChartProps) {
           position: absolute;
           top: 0; left: 0; right: 0;
           height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(108, 99, 255, 0.5), transparent);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+        }
+
+        .mood-chart-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin-bottom: 24px;
         }
 
         .mood-chart-empty {
@@ -137,12 +152,13 @@ export function MoodChart({ data }: MoodChartProps) {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 16px;
-          padding: 64px 0;
+          gap: 12px;
+          padding: 56px 0;
           text-align: center;
-          background: rgba(15, 14, 23, 0.4);
-          border-radius: 24px;
-          border: 1px dashed rgba(255, 255, 255, 0.1);
+          background: var(--glass-bg);
+          border: 1px dashed var(--glass-border);
+          border-radius: var(--radius-xl);
+          backdrop-filter: blur(12px);
         }
 
         .chart-legend {
@@ -153,26 +169,26 @@ export function MoodChart({ data }: MoodChartProps) {
         .chart-legend-item {
           display: flex;
           align-items: center;
-          gap: 8px;
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: rgba(255,255,255,0.7);
+          gap: 6px;
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: var(--text-muted);
         }
 
         .chart-legend-dot {
-          width: 10px;
-          height: 10px;
+          width: 8px;
+          height: 8px;
           border-radius: 50%;
         }
 
-        .glow-purple {
-          background: #6c63ff;
-          box-shadow: 0 0 10px #6c63ff;
+        .chart-dot-primary {
+          background: #ffffff;
+          box-shadow: 0 0 8px rgba(255,255,255,0.5);
+          animation: pulseGlow 2s ease-in-out infinite;
         }
 
-        .glow-cyan {
-          background: #00f2fe;
-          box-shadow: 0 0 10px #00f2fe;
+        .chart-dot-secondary {
+          background: rgba(255,255,255,0.35);
         }
       `}</style>
     </div>

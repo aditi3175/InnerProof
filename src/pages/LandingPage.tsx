@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Shield, Bot, Trophy, Lock, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Shield, ArrowRight, CheckCircle2 } from 'lucide-react';
 
 interface LandingPageProps {
   isConnected: boolean;
@@ -20,7 +20,6 @@ export function LandingPage({
     if (isConnected) {
       navigate('/chat');
     } else if (isWalletConnected) {
-      // If wallet is hooked but not signed/verified
       onVerify();
     } else {
       onConnect();
@@ -29,26 +28,23 @@ export function LandingPage({
 
   return (
     <div className="landing">
-      {/* Background */}
-      <div className="landing-bg">
-        <div className="landing-orb landing-orb-1" />
-        <div className="landing-orb landing-orb-2" />
-        <div className="landing-orb landing-orb-3" />
-        <div className="landing-grid" />
-      </div>
+      {/* Grain texture overlay */}
+      <div className="grain" />
 
       {/* Nav */}
       <nav className="landing-nav">
         <div className="landing-nav-inner">
           <div className="landing-logo">
             <div className="landing-logo-icon">
-              <Shield size={20} />
+              <Shield size={16} strokeWidth={1.5} />
             </div>
-            <span className="gradient-text" style={{ fontWeight: 800, fontSize: '1.2rem' }}>
-              InnerProof
-            </span>
+            <span className="landing-logo-text">InnerProof</span>
           </div>
-          <button onClick={handleCTA} className={`btn ${isConnected ? 'btn-secondary' : 'btn-primary'}`} id="landing-connect-btn">
+          <button 
+            onClick={handleCTA} 
+            className={isConnected ? 'nav-btn-ghost' : 'nav-btn-ghost'} 
+            id="landing-connect-btn"
+          >
             {isConnected ? 'Go to Chat' : isWalletConnected ? 'Verify Account' : 'Connect Wallet'}
           </button>
         </div>
@@ -56,186 +52,139 @@ export function LandingPage({
 
       {/* Hero */}
       <section className="landing-hero">
-        <div className="landing-hero-content stagger-children">
-          <div className="landing-badge">
-            <Sparkles size={14} />
-            <span>Built on Initia · Powered by AI</span>
+        <div className="hero-inner">
+          {/* Platinum tag line */}
+          <p className="hero-tag">Built on Initia · Powered by AI</p>
+
+          {/* Main typography block */}
+          <div className="hero-text-block">
+            <h1 className="hero-line-1">Your Mind,</h1>
+            <h1 className="hero-line-2">Your <em>Proof.</em></h1>
+            <h1 className="hero-line-3">Zero Exposure.</h1>
           </div>
 
-          <h1 className="heading-1">
-            Your Mind,<br />
-            <span className="gradient-text">Your Proof.</span><br />
-            <span style={{ color: 'var(--text-secondary)', fontSize: '0.7em' }}>Zero Exposure.</span>
-          </h1>
-
-          <p className="text-body" style={{ fontSize: '1.15rem', maxWidth: '540px' }}>
+          {/* Description */}
+          <p className="hero-description">
             Anonymous AI therapy with verifiable progress tracking.
             No personal data. No surveillance. Just a private conversation
             and a soulbound proof of your journey.
           </p>
 
-          <div className="landing-cta-group">
+          {/* CTA */}
+          <div className="hero-cta-group">
             <button 
               onClick={handleCTA} 
-              className={`btn ${isConnected ? 'btn-primary' : 'btn-primary'} btn-lg`} 
+              className="hero-cta-primary" 
               id="hero-cta-btn"
-              style={isWalletConnected && !isConnected ? { background: 'var(--warning)', borderColor: 'var(--warning-hover)' } : {}}
             >
-              {isConnected ? (
-                <>Start Session <ArrowRight size={18} /></>
-              ) : isWalletConnected ? (
-                <>Approve in Wallet <CheckCircle2 size={18} /></>
-              ) : (
-                <>Connect Wallet & Begin <ArrowRight size={18} /></>
-              )}
+              <span className="hero-cta-label">
+                {isConnected ? (
+                  <>Start Session</>
+                ) : isWalletConnected ? (
+                  <>Approve in Wallet</>
+                ) : (
+                  <>Connect Wallet & Begin</>
+                )}
+              </span>
+              <span className="hero-cta-arrow">
+                {isWalletConnected && !isConnected ? <CheckCircle2 size={18} /> : <ArrowRight size={18} />}
+              </span>
             </button>
-            <span className="text-small">
+            <span className="hero-cta-sub">
               {isWalletConnected && !isConnected 
-                ? 'Please sign the verification message in your wallet' 
-                : 'No sign-up required · Wallet-only login'}
+                ? 'Sign the verification message in your wallet' 
+                : 'No sign-up · Wallet-only · Zero PII'}
             </span>
           </div>
         </div>
       </section>
 
+      {/* Divider */}
+      <div className="section-divider" />
+
       {/* Features */}
       <section className="landing-features">
-        <div className="landing-features-grid stagger-children">
-          <div className="feature-card glass-card">
-            <div className="feature-icon" style={{ background: 'rgba(108, 99, 255, 0.15)' }}>
-              <Lock size={24} style={{ color: 'var(--primary-400)' }} />
+        <div className="features-inner">
+          {[
+            { num: '01', title: 'Anonymous', desc: 'No emails, no names, no personal data. Connect your wallet and that\'s it. Your identity stays completely private.' },
+            { num: '02', title: 'AI Companion', desc: 'A compassionate AI therapist available 24/7. Evidence-based techniques from CBT and mindfulness to support your journey.' },
+            { num: '03', title: 'Soulbound', desc: 'Your progress is minted as a non-transferable NFT. It proves your commitment without exposing any private conversations.' },
+          ].map((f) => (
+            <div key={f.num} className="feature-item">
+              <span className="feature-num">{f.num}</span>
+              <div className="feature-content">
+                <h3 className="feature-title">{f.title}</h3>
+                <p className="feature-desc">{f.desc}</p>
+              </div>
             </div>
-            <h3 className="heading-3">100% Anonymous</h3>
-            <p className="text-body">
-              No emails, no names, no personal data. Connect your wallet and that's it.
-              Your identity stays completely private.
-            </p>
-          </div>
-
-          <div className="feature-card glass-card">
-            <div className="feature-icon" style={{ background: 'rgba(56, 178, 172, 0.15)' }}>
-              <Bot size={24} style={{ color: 'var(--accent-400)' }} />
-            </div>
-            <h3 className="heading-3">AI Companion</h3>
-            <p className="text-body">
-              A compassionate AI therapist available 24/7. Using evidence-based techniques
-              from CBT and mindfulness to support your journey.
-            </p>
-          </div>
-
-          <div className="feature-card glass-card">
-            <div className="feature-icon" style={{ background: 'rgba(251, 191, 36, 0.15)' }}>
-              <Trophy size={24} style={{ color: 'var(--warning)' }} />
-            </div>
-            <h3 className="heading-3">Soulbound Proof</h3>
-            <p className="text-body">
-              Your progress is minted as a non-transferable NFT. It proves your commitment
-              without exposing any private conversations.
-            </p>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="landing-steps">
-        <h2 className="heading-2 gradient-text" style={{ textAlign: 'center', marginBottom: '40px' }}>
-          How It Works
-        </h2>
-        <div className="steps-grid stagger-children">
-          <div className="step-item">
-            <div className="step-number">01</div>
-            <h3>Connect</h3>
-            <p>Link your wallet — no personal info needed.</p>
-          </div>
-          <div className="step-connector" />
-          <div className="step-item">
-            <div className="step-number">02</div>
-            <h3>Talk</h3>
-            <p>Have a private AI therapy session.</p>
-          </div>
-          <div className="step-connector" />
-          <div className="step-item">
-            <div className="step-number">03</div>
-            <h3>Track</h3>
-            <p>Monitor your mood improvement over time.</p>
-          </div>
-          <div className="step-connector" />
-          <div className="step-item">
-            <div className="step-number">04</div>
-            <h3>Prove</h3>
-            <p>Mint a Soulbound NFT of your progress.</p>
+      {/* Divider */}
+      <div className="section-divider" />
+
+      {/* How it works — typographic */}
+      <section className="landing-process">
+        <div className="process-inner">
+          <h2 className="process-heading">Process</h2>
+          <div className="process-grid">
+            {[
+              { step: 'I', word: 'Connect', sub: 'Link your wallet' },
+              { step: 'II', word: 'Talk', sub: 'Private AI session' },
+              { step: 'III', word: 'Track', sub: 'Monitor improvement' },
+              { step: 'IV', word: 'Prove', sub: 'Mint your SBT' },
+            ].map((p) => (
+              <div key={p.step} className="process-item">
+                <span className="process-step">{p.step}</span>
+                <span className="process-word">{p.word}</span>
+                <span className="process-sub">{p.sub}</span>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Footer */}
       <footer className="landing-footer">
-        <div className="landing-footer-inner">
-          <span className="gradient-text" style={{ fontWeight: 700 }}>InnerProof</span>
-          <span className="text-small">Built with ❤️ on Initia · Hackathon 2026</span>
+        <div className="footer-inner">
+          <span className="footer-brand">InnerProof</span>
+          <span className="footer-sub">Hackathon 2026 · Initia</span>
         </div>
       </footer>
 
       <style>{`
-        .landing {
-          min-height: 100vh;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .landing-bg {
+        /* ===== GRAIN TEXTURE ===== */
+        .grain {
           position: fixed;
           inset: 0;
           z-index: 0;
           pointer-events: none;
+          opacity: 0.035;
+          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+          background-repeat: repeat;
+          background-size: 128px 128px;
         }
 
-        .landing-orb {
-          position: absolute;
-          border-radius: 50%;
-          filter: blur(80px);
+        /* ===== LANDING BASE ===== */
+        .landing {
+          min-height: 100vh;
+          background: #000000;
+          position: relative;
         }
 
-        .landing-orb-1 {
-          width: 500px;
-          height: 500px;
-          top: -150px;
-          left: -100px;
-          background: rgba(108, 99, 255, 0.15);
-          animation: float 8s ease-in-out infinite;
+        .section-divider {
+          max-width: 1200px;
+          margin: 0 auto;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, var(--platinum-dim), transparent);
         }
 
-        .landing-orb-2 {
-          width: 400px;
-          height: 400px;
-          bottom: -100px;
-          right: -50px;
-          background: rgba(56, 178, 172, 0.1);
-          animation: float 10s ease-in-out infinite reverse;
-        }
-
-        .landing-orb-3 {
-          width: 300px;
-          height: 300px;
-          top: 40%;
-          right: 20%;
-          background: rgba(159, 122, 234, 0.08);
-          animation: float 12s ease-in-out infinite;
-        }
-
-        .landing-grid {
-          position: absolute;
-          inset: 0;
-          background-image:
-            linear-gradient(rgba(108, 99, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(108, 99, 255, 0.03) 1px, transparent 1px);
-          background-size: 60px 60px;
-        }
-
+        /* ===== NAV ===== */
         .landing-nav {
           position: relative;
           z-index: 10;
-          padding: 20px 32px;
+          padding: 32px 48px;
         }
 
         .landing-nav-inner {
@@ -253,146 +202,329 @@ export function LandingPage({
         }
 
         .landing-logo-icon {
-          width: 36px;
-          height: 36px;
+          width: 32px;
+          height: 32px;
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
-          border-radius: var(--radius-sm);
-          color: white;
+          border: 1px solid var(--platinum-dim);
+          border-radius: 8px;
+          color: var(--platinum);
         }
 
+        .landing-logo-text {
+          font-family: var(--font-sans);
+          font-weight: 600;
+          font-size: 1rem;
+          letter-spacing: -0.02em;
+          color: #ffffff;
+        }
+
+        .nav-btn-ghost {
+          font-family: var(--font-sans);
+          font-size: 0.8rem;
+          font-weight: 500;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          color: var(--platinum);
+          background: transparent;
+          border: 1px solid var(--platinum-dim);
+          border-radius: 6px;
+          padding: 10px 24px;
+          cursor: pointer;
+          transition: all 0.4s ease;
+        }
+
+        .nav-btn-ghost:hover {
+          border-color: var(--platinum);
+          color: #ffffff;
+          background: var(--platinum-subtle);
+        }
+
+        /* ===== HERO ===== */
         .landing-hero {
           position: relative;
-          z-index: 10;
+          z-index: 1;
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 70vh;
-          padding: 40px 32px;
+          min-height: 82vh;
+          padding: 80px 48px;
         }
 
-        .landing-hero-content {
+        .hero-inner {
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
-          gap: 24px;
+          gap: 48px;
+          max-width: 820px;
         }
 
-        .landing-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          padding: 6px 16px;
-          background: var(--surface-glass);
-          border: 1px solid var(--surface-border);
-          border-radius: var(--radius-full);
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: var(--primary-400);
+        .hero-tag {
+          font-family: var(--font-sans);
+          font-size: 0.7rem;
+          font-weight: 500;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--platinum);
         }
 
-        .landing-cta-group {
+        /* ----- Hero typography ----- */
+        .hero-text-block {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 12px;
-          margin-top: 8px;
+          gap: 0;
         }
 
+        .hero-line-1 {
+          font-family: var(--font-sans);
+          font-size: clamp(3rem, 7vw, 5.5rem);
+          font-weight: 700;
+          line-height: 1.0;
+          letter-spacing: -0.04em;
+          color: #ffffff;
+        }
+
+        .hero-line-2 {
+          font-family: var(--font-sans);
+          font-size: clamp(3rem, 7vw, 5.5rem);
+          font-weight: 700;
+          line-height: 1.05;
+          letter-spacing: -0.04em;
+          color: #ffffff;
+        }
+
+        .hero-line-2 em {
+          font-family: var(--font-serif);
+          font-style: italic;
+          font-weight: 400;
+          color: var(--platinum);
+        }
+
+        .hero-line-3 {
+          font-family: var(--font-sans);
+          font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+          font-weight: 400;
+          line-height: 1.4;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.25);
+          margin-top: 20px;
+        }
+
+        .hero-description {
+          font-family: var(--font-sans);
+          font-size: 1.1rem;
+          font-weight: 400;
+          line-height: 1.8;
+          color: rgba(255, 255, 255, 0.55);
+          max-width: 520px;
+          letter-spacing: 0.005em;
+        }
+
+        /* ----- CTA ----- */
+        .hero-cta-group {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 20px;
+          margin-top: 16px;
+        }
+
+        .hero-cta-primary {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 18px 40px;
+          background: #ffffff;
+          color: #000000;
+          border: none;
+          border-radius: 0px;
+          font-family: var(--font-sans);
+          font-size: 0.85rem;
+          font-weight: 600;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          cursor: pointer;
+          transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+          position: relative;
+          overflow: hidden;
+        }
+
+        .hero-cta-primary:hover {
+          transform: scale(1.03);
+          background: var(--platinum);
+          color: #000000;
+        }
+
+        .hero-cta-primary:active {
+          transform: scale(0.99);
+        }
+
+        .hero-cta-arrow {
+          display: flex;
+          align-items: center;
+          transition: transform 0.4s ease;
+        }
+
+        .hero-cta-primary:hover .hero-cta-arrow {
+          transform: translateX(4px);
+        }
+
+        .hero-cta-sub {
+          font-family: var(--font-sans);
+          font-size: 0.7rem;
+          font-weight: 400;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.25);
+        }
+
+        /* ===== FEATURES ===== */
         .landing-features {
           position: relative;
-          z-index: 10;
-          padding: 80px 32px;
+          z-index: 1;
+          padding: 100px 48px;
         }
 
-        .landing-features-grid {
-          max-width: 1100px;
+        .features-inner {
+          max-width: 1000px;
           margin: 0 auto;
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 24px;
-        }
-
-        .feature-card {
-          padding: 32px;
           display: flex;
           flex-direction: column;
-          gap: 16px;
-        }
-
-        .feature-icon {
-          width: 52px;
-          height: 52px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border-radius: var(--radius-md);
-        }
-
-        .landing-steps {
-          position: relative;
-          z-index: 10;
-          padding: 60px 32px 80px;
-        }
-
-        .steps-grid {
-          max-width: 900px;
-          margin: 0 auto;
-          display: flex;
-          align-items: center;
-          justify-content: center;
           gap: 0;
-          flex-wrap: nowrap;
         }
 
-        .step-item {
+        .feature-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 40px;
+          padding: 48px 0;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+          transition: all 0.4s ease;
+        }
+
+        .feature-item:last-child {
+          border-bottom: none;
+        }
+
+        .feature-item:hover {
+          padding-left: 12px;
+        }
+
+        .feature-num {
+          font-family: var(--font-mono);
+          font-size: 0.7rem;
+          font-weight: 400;
+          color: var(--platinum-dim);
+          letter-spacing: 0.05em;
+          min-width: 32px;
+          padding-top: 4px;
+        }
+
+        .feature-content {
           display: flex;
           flex-direction: column;
-          align-items: center;
-          gap: 8px;
-          text-align: center;
-          padding: 20px 24px;
+          gap: 12px;
         }
 
-        .step-item h3 {
-          font-size: 1rem;
-          font-weight: 700;
-          color: var(--text-primary);
+        .feature-title {
+          font-family: var(--font-sans);
+          font-size: 1.4rem;
+          font-weight: 600;
+          letter-spacing: -0.02em;
+          color: #ffffff;
         }
 
-        .step-item p {
+        .feature-desc {
+          font-family: var(--font-sans);
+          font-size: 0.95rem;
+          font-weight: 400;
+          line-height: 1.7;
+          color: rgba(255, 255, 255, 0.45);
+          max-width: 520px;
+        }
+
+        /* ===== PROCESS ===== */
+        .landing-process {
+          position: relative;
+          z-index: 1;
+          padding: 100px 48px 120px;
+        }
+
+        .process-inner {
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+
+        .process-heading {
+          font-family: var(--font-serif);
+          font-size: clamp(2rem, 4vw, 3.2rem);
+          font-weight: 400;
+          font-style: italic;
+          color: var(--platinum);
+          margin-bottom: 64px;
+          letter-spacing: -0.01em;
+        }
+
+        .process-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 0;
+        }
+
+        .process-item {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+          padding: 32px 24px;
+          border-left: 1px solid rgba(255, 255, 255, 0.06);
+          transition: all 0.4s ease;
+        }
+
+        .process-item:first-child {
+          border-left: none;
+          padding-left: 0;
+        }
+
+        .process-item:hover {
+          background: var(--platinum-subtle);
+        }
+
+        .process-step {
+          font-family: var(--font-serif);
           font-size: 0.85rem;
-          color: var(--text-muted);
-          max-width: 160px;
+          font-style: italic;
+          color: var(--platinum-dim);
+          letter-spacing: 0.02em;
         }
 
-        .step-number {
-          font-size: 2rem;
-          font-weight: 900;
-          background: linear-gradient(135deg, var(--primary-400), var(--accent-400));
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
+        .process-word {
+          font-family: var(--font-sans);
+          font-size: 1.5rem;
+          font-weight: 700;
+          letter-spacing: -0.03em;
+          color: #ffffff;
         }
 
-        .step-connector {
-          width: 40px;
-          height: 2px;
-          background: linear-gradient(90deg, var(--primary-500), var(--accent-500));
-          opacity: 0.3;
+        .process-sub {
+          font-family: var(--font-sans);
+          font-size: 0.8rem;
+          font-weight: 400;
+          color: rgba(255, 255, 255, 0.3);
         }
 
+        /* ===== FOOTER ===== */
         .landing-footer {
           position: relative;
-          z-index: 10;
-          padding: 24px 32px;
-          border-top: 1px solid var(--surface-border);
+          z-index: 1;
+          padding: 32px 48px;
+          border-top: 1px solid rgba(255, 255, 255, 0.06);
         }
 
-        .landing-footer-inner {
+        .footer-inner {
           max-width: 1200px;
           margin: 0 auto;
           display: flex;
@@ -400,17 +532,53 @@ export function LandingPage({
           justify-content: space-between;
         }
 
+        .footer-brand {
+          font-family: var(--font-sans);
+          font-weight: 600;
+          font-size: 0.85rem;
+          color: rgba(255, 255, 255, 0.4);
+          letter-spacing: -0.01em;
+        }
+
+        .footer-sub {
+          font-family: var(--font-sans);
+          font-size: 0.7rem;
+          font-weight: 400;
+          color: rgba(255, 255, 255, 0.2);
+          letter-spacing: 0.05em;
+          text-transform: uppercase;
+        }
+
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-          .step-connector {
-            display: none;
+          .landing-nav, .landing-hero, .landing-features, .landing-process, .landing-footer {
+            padding-left: 24px;
+            padding-right: 24px;
           }
 
-          .steps-grid {
+          .landing-hero {
+            min-height: 70vh;
+            padding-top: 60px;
+            padding-bottom: 60px;
+          }
+
+          .hero-inner {
+            gap: 36px;
+          }
+
+          .feature-item {
             flex-direction: column;
+            gap: 12px;
           }
 
-          .landing-features-grid {
-            grid-template-columns: 1fr;
+          .process-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+
+          .process-item {
+            border-left: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            padding-left: 0;
           }
         }
       `}</style>

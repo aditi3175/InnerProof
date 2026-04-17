@@ -21,22 +21,19 @@ export function Navbar({
   return (
     <header className="navbar">
       <div className="navbar-inner">
-        {/* Left: Page indicator */}
         <div className="navbar-left">
           {sessionActive && (
             <div className="session-indicator">
-              <Zap size={14} />
+              <span className="session-pulse" />
               <span>Session Active</span>
-              <span className="session-dot" />
             </div>
           )}
         </div>
 
-        {/* Right: Wallet */}
         <div className="navbar-right">
           {isConnected && walletAddress ? (
             <div className="wallet-connected">
-              <div className="wallet-address glass">
+              <div className="wallet-address">
                 <div className="wallet-avatar" />
                 <span>{truncateAddress(walletAddress)}</span>
               </div>
@@ -46,16 +43,12 @@ export function Navbar({
                 title="Disconnect"
                 id="disconnect-wallet-btn"
               >
-                <LogOut size={16} />
+                <LogOut size={14} strokeWidth={1.5} />
               </button>
             </div>
           ) : (
-            <button
-              onClick={onConnect}
-              className="btn btn-primary"
-              id="connect-wallet-btn"
-            >
-              <Wallet size={18} />
+            <button onClick={onConnect} className="btn btn-primary" id="connect-wallet-btn">
+              <Wallet size={16} strokeWidth={1.5} />
               Connect Wallet
             </button>
           )}
@@ -67,10 +60,11 @@ export function Navbar({
           position: sticky;
           top: 0;
           z-index: 40;
-          padding: 16px 32px;
-          background: rgba(10, 10, 18, 0.8);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid var(--surface-border);
+          padding: 14px 40px;
+          background: rgba(5, 5, 5, 0.7);
+          backdrop-filter: blur(20px) saturate(1.2);
+          -webkit-backdrop-filter: blur(20px) saturate(1.2);
+          border-bottom: 1px solid var(--glass-border);
         }
 
         .navbar-inner {
@@ -81,13 +75,7 @@ export function Navbar({
           margin: 0 auto;
         }
 
-        .navbar-left {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .navbar-right {
+        .navbar-left, .navbar-right {
           display: flex;
           align-items: center;
           gap: 12px;
@@ -97,22 +85,24 @@ export function Navbar({
           display: inline-flex;
           align-items: center;
           gap: 8px;
-          padding: 6px 14px;
-          background: rgba(108, 99, 255, 0.1);
-          border: 1px solid rgba(108, 99, 255, 0.2);
+          padding: 5px 14px;
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
           border-radius: var(--radius-full);
-          color: var(--primary-400);
-          font-size: 0.8rem;
+          color: var(--text-secondary);
+          font-size: 0.72rem;
           font-weight: 600;
-          animation: pulseGlow 2s ease-in-out infinite;
+          letter-spacing: 0.03em;
+          backdrop-filter: blur(12px);
         }
 
-        .session-dot {
+        .session-pulse {
           width: 6px;
           height: 6px;
           border-radius: 50%;
-          background: var(--success);
-          animation: pulseGlow 1.5s ease-in-out infinite;
+          background: #fff;
+          box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+          animation: pulseGlow 2s ease-in-out infinite;
         }
 
         .wallet-connected {
@@ -126,22 +116,26 @@ export function Navbar({
           align-items: center;
           gap: 8px;
           padding: 6px 14px;
-          font-size: 0.85rem;
+          font-size: 0.78rem;
           font-weight: 500;
-          font-family: 'SF Mono', 'Fira Code', monospace;
+          font-family: var(--font-mono);
+          background: var(--glass-bg);
+          border: 1px solid var(--glass-border);
+          border-radius: var(--radius-lg);
+          color: var(--text-secondary);
+          backdrop-filter: blur(12px);
         }
 
         .wallet-avatar {
-          width: 20px;
-          height: 20px;
+          width: 16px;
+          height: 16px;
           border-radius: 50%;
-          background: linear-gradient(135deg, var(--primary-500), var(--accent-500));
+          background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
+          border: 1px solid var(--glass-border);
         }
 
         @media (max-width: 768px) {
-          .navbar {
-            padding: 12px 16px;
-          }
+          .navbar { padding: 12px 16px; }
         }
       `}</style>
     </header>
